@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -55,7 +56,7 @@ export function Dashboard() {
         }
         
         // Transform the data to match our FanLink type
-        const transformedData: FanLink[] = data.map((link) => {
+        const transformedData: FanLink[] = data.map((link: any) => {
           const fanLink: FanLink = {
             id: link.id,
             artist_id: link.user_id,

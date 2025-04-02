@@ -11,7 +11,7 @@ export type Tables = {
     text_color?: string | null;
     button_color?: string | null;
     button_text_color?: string | null;
-    background_image_url?: string | null;  // Changed field name to match what we use in code
+    background_image_url?: string | null;  // Ensuring this matches the database field name
     created_at: string;
     updated_at: string;
   };
