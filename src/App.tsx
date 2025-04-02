@@ -8,6 +8,8 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import FanLink from "./pages/FanLink";
 import NotFound from "./pages/NotFound";
+import Resources from "./pages/Resources";
+import Legal from "./pages/Legal";
 
 // Create a new QueryClient for React Query
 const queryClient = new QueryClient({
@@ -32,6 +34,8 @@ const App = () => (
           <Route path="/edit/:id" element={<Dashboard />} />
           <Route path="/link/:slug" element={<FanLink />} />
           <Route path="/l/:slug" element={<FanLink />} /> {/* Short URL alternative */}
+          <Route path="/resources" element={<Resources />} />
+          <Route path="/legal" element={<Legal />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

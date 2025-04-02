@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { useState } from "react";
+import { AuthStatus } from "@/components/auth/AuthStatus";
 
 interface HeaderProps {
   isLoggedIn?: boolean;
@@ -36,6 +37,7 @@ export function Header({ isLoggedIn: initialLoggedIn = false }: HeaderProps) {
             </Button>
           )}
           <AuthButton onAuthChange={setIsLoggedIn} />
+          <AuthStatus />
         </div>
       </div>
     </header>

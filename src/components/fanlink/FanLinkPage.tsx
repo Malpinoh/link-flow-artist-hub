@@ -53,6 +53,8 @@ export function FanLinkPage() {
           return;
         }
         
+        console.log("Fetched data from Supabase:", data);
+        
         // Transform the data to match our FanLink type
         const transformedData: FanLink = {
           id: data.id,
@@ -60,7 +62,7 @@ export function FanLinkPage() {
           track_name: data.title,
           cover_art_url: data.cover_image || "",
           streaming_links: {},
-          cta_button_text: "Stream Now",
+          cta_button_text: data.button_text || "Stream Now",
           background_color: data.background_color || undefined,
           background_image_url: data.background_color ? undefined : data.cover_image, // Use cover image as background if no background color
           created_at: data.created_at,
@@ -91,7 +93,7 @@ export function FanLinkPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="h-12 w-12 rounded-full music-gradient flex items-center justify-center mx-auto mb-4 animate-bounce">
+          <div className="h-12 w-12 rounded-full music-gradient flex items-center justify-center mx-auto mb-4 animate-pulse">
             <Music size={24} className="text-white" />
           </div>
           <p className="text-muted-foreground">Loading music link...</p>
