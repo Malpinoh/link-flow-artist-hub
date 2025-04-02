@@ -1,4 +1,3 @@
-
 export type Tables = {
   fan_links: {
     id: string;
@@ -11,7 +10,6 @@ export type Tables = {
     text_color?: string | null;
     button_color?: string | null;
     button_text_color?: string | null;
-    background_image_url?: string | null;  // Fixed field name to match what the components expect
     created_at: string;
     updated_at: string;
   };
