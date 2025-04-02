@@ -67,7 +67,7 @@ const Index = () => {
                 <div className="h-12 w-12 rounded-full music-gradient flex items-center justify-center mb-4">
                   <Music size={24} className="text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">1. Create a FanLink</h3>
+                <h3 className="text-xl font-bold mb-2">1. Create a Link</h3>
                 <p className="text-muted-foreground">
                   Upload your cover art and add links to your music on all streaming platforms.
                 </p>
@@ -87,7 +87,7 @@ const Index = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-2">3. Share Everywhere</h3>
                 <p className="text-muted-foreground">
-                  Share your unique FanLink URL on social media, newsletters, or anywhere you connect with fans.
+                  Share your unique link URL on social media, newsletters, or anywhere you connect with fans.
                 </p>
               </div>
             </div>
@@ -100,9 +100,9 @@ const Index = () => {
             <div className="grid gap-6 lg:grid-cols-[1fr_600px] lg:gap-12">
               <div className="flex items-center">
                 <div className="space-y-4">
-                  <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Why Musicians Love FanLink</h2>
+                  <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Why Musicians Love MALPINOHDISTRO LINK</h2>
                   <p className="text-muted-foreground md:text-xl">
-                    FanLink is built specifically for independent artists and labels who need simple, effective music promotion tools.
+                    MALPINOHDISTRO LINK is built specifically for independent artists and labels who need simple, effective music promotion tools.
                   </p>
                   <ul className="grid gap-6">
                     <li className="flex items-start">
@@ -152,7 +152,7 @@ const Index = () => {
               <div className="relative mx-auto aspect-video overflow-hidden rounded-xl bg-muted lg:order-last">
                 <img 
                   src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1740&auto=format&fit=crop" 
-                  alt="FanLink Example" 
+                  alt="MALPINOHDISTRO LINK Example" 
                   className="object-cover w-full h-full"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-40" />
@@ -174,11 +174,11 @@ const Index = () => {
                 Ready to Grow Your Music Audience?
               </h2>
               <p className="mx-auto max-w-[700px] text-lg text-white/80 mb-8">
-                Join thousands of artists using FanLink to promote their music and connect with fans across all platforms.
+                Join thousands of artists using MALPINOHDISTRO LINK to promote their music and connect with fans across all platforms.
               </p>
               <Button size="lg" variant="secondary" asChild>
                 <Link to="/dashboard">
-                  Create Your First FanLink
+                  Create Your First Link
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>

@@ -5,6 +5,8 @@ import { FanLinkPreview } from "@/components/dashboard/FanLinkPreview";
 import { dummyFanLinks } from "@/lib/dummy-data";
 import { FanLink } from "@/types/fanlink";
 import { Music } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/sonner";
 
 export function FanLinkPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -17,18 +19,66 @@ export function FanLinkPage() {
       try {
         setLoading(true);
         
-        // In a real app, this would fetch from Supabase
-        // Using dummy data for demonstration
-        const found = dummyFanLinks.find(link => link.slug === slug);
-        
-        if (found) {
-          setFanLink(found);
-        } else {
-          setError("FanLink not found");
+        if (import.meta.env.DEV && !import.meta.env.VITE_USE_SUPABASE) {
+          // Use dummy data in development if not using Supabase
+          const found = dummyFanLinks.find(link => link.slug === slug);
+          
+          if (found) {
+            setFanLink(found);
+          } else {
+            setError("Link not found");
+          }
+          return;
         }
+        
+        // Fetch from Supabase
+        const { data, error } = await supabase
+          .from('fan_links')
+          .select(`
+            *,
+            streaming_links(*)
+          `)
+          .eq('slug', slug)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching fan link:', error);
+          setError("Failed to load link");
+          toast.error("Error loading link");
+          return;
+        }
+        
+        if (!data) {
+          setError("Link not found");
+          return;
+        }
+        
+        // Transform the data to match our FanLink type
+        const transformedData: FanLink = {
+          id: data.id,
+          artist_id: data.user_id,
+          track_name: data.title,
+          cover_art_url: data.cover_image,
+          streaming_links: {},
+          cta_button_text: "Stream Now",
+          background_color: data.background_color,
+          background_image_url: data.background_image,
+          created_at: data.created_at,
+          slug: data.slug
+        };
+        
+        // Transform streaming links
+        if (data.streaming_links) {
+          data.streaming_links.forEach((link: any) => {
+            transformedData.streaming_links[link.platform as keyof typeof transformedData.streaming_links] = link.url;
+          });
+        }
+        
+        setFanLink(transformedData);
       } catch (err) {
-        setError("Failed to load FanLink");
-        console.error(err);
+        console.error("Failed to load link:", err);
+        setError("Failed to load link");
+        toast.error("Error loading link");
       } finally {
         setLoading(false);
       }
@@ -73,7 +123,7 @@ export function FanLinkPage() {
     <div className="min-h-screen flex flex-col">
       <FanLinkPreview fanLink={fanLink} isPreview={false} />
       <div className="py-4 text-center text-xs text-muted-foreground">
-        <p>Created with FanLink</p>
+        <p>Created with MALPINOHDISTRO LINK</p>
       </div>
     </div>
   );

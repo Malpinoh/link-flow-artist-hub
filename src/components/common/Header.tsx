@@ -27,7 +27,7 @@ export function Header({ isLoggedIn = false }) {
           <div className="h-8 w-8 rounded-full music-gradient flex items-center justify-center">
             <Music size={18} className="text-white" />
           </div>
-          <span className="font-bold text-xl">FanLink</span>
+          <span className="font-bold text-xl">MALPINOHDISTRO LINK</span>
         </Link>
         
         {/* Desktop Navigation */}
@@ -57,9 +57,6 @@ export function Header({ isLoggedIn = false }) {
               </Button>
               <Button asChild variant="ghost">
                 <Link to="/features">Features</Link>
-              </Button>
-              <Button asChild variant="ghost">
-                <Link to="/pricing">Pricing</Link>
               </Button>
               <Button asChild variant="default">
                 <Link to="/dashboard">Get Started</Link>
@@ -120,9 +117,6 @@ export function Header({ isLoggedIn = false }) {
                 </Button>
                 <Button asChild variant="ghost" className="justify-start" onClick={toggleMobileMenu}>
                   <Link to="/features">Features</Link>
-                </Button>
-                <Button asChild variant="ghost" className="justify-start" onClick={toggleMobileMenu}>
-                  <Link to="/pricing">Pricing</Link>
                 </Button>
                 <Button asChild variant="default" className="justify-start mt-4" onClick={toggleMobileMenu}>
                   <Link to="/dashboard">Get Started</Link>
