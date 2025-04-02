@@ -6,7 +6,7 @@ import { dummyFanLinks } from "@/lib/dummy-data";
 import { FanLink } from "@/types/fanlink";
 import { Music } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 export function FanLinkPage() {
   const { slug } = useParams<{ slug: string }>();

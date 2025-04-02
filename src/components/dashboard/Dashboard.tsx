@@ -7,7 +7,7 @@ import { PlusCircle, ExternalLink, Calendar, Edit } from "lucide-react";
 import { dummyFanLinks } from "@/lib/dummy-data";
 import { FanLink } from "@/types/fanlink";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 export function Dashboard() {
   const [fanLinks, setFanLinks] = useState<FanLink[]>([]);
