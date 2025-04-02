@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { FanLinkPreview } from "@/components/dashboard/FanLinkPreview";
@@ -7,7 +6,6 @@ import { FanLink } from "@/types/fanlink";
 import { Music } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Tables } from "@/types/supabase";
 
 export function FanLinkPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -32,9 +30,9 @@ export function FanLinkPage() {
           return;
         }
         
-        // Fetch from Supabase
+        // Fetch from Supabase with correct typing
         const { data, error } = await supabase
-          .from<Tables["fan_links"]>('fan_links')
+          .from('fan_links')
           .select(`
             *,
             streaming_links(*)
@@ -59,11 +57,11 @@ export function FanLinkPage() {
           id: data.id,
           artist_id: data.user_id,
           track_name: data.title,
-          cover_art_url: data.cover_image,
+          cover_art_url: data.cover_image || "",
           streaming_links: {},
           cta_button_text: "Stream Now",
-          background_color: data.background_color,
-          background_image_url: data.background_image,
+          background_color: data.background_color || undefined,
+          background_image_url: data.background_image || undefined,
           created_at: data.created_at,
           slug: data.slug
         };

@@ -33,9 +33,9 @@ export function Dashboard() {
           return;
         }
         
-        // Fetch from Supabase
+        // Fetch from Supabase with correct typing
         const { data, error } = await supabase
-          .from<Tables["fan_links"]>('fan_links')
+          .from('fan_links')
           .select(`
             *,
             streaming_links(*)
@@ -56,16 +56,16 @@ export function Dashboard() {
         }
         
         // Transform the data to match our FanLink type
-        const transformedData: FanLink[] = data.map((link: any) => {
+        const transformedData: FanLink[] = data.map((link) => {
           const fanLink: FanLink = {
             id: link.id,
             artist_id: link.user_id,
             track_name: link.title,
-            cover_art_url: link.cover_image,
+            cover_art_url: link.cover_image || "",
             streaming_links: {},
             cta_button_text: "Stream Now",
-            background_color: link.background_color,
-            background_image_url: link.background_image,
+            background_color: link.background_color || undefined,
+            background_image_url: link.background_image || undefined,
             created_at: link.created_at,
             slug: link.slug
           };

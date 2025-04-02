@@ -6,12 +6,12 @@ export type Tables = {
     title: string;
     artist: string;
     slug: string;
-    cover_image: string;
-    background_color?: string;
-    text_color?: string;
-    button_color?: string;
-    button_text_color?: string;
-    background_image?: string;
+    cover_image: string | null;
+    background_color?: string | null;
+    text_color?: string | null;
+    button_color?: string | null;
+    button_text_color?: string | null;
+    background_image?: string | null;
     created_at: string;
     updated_at: string;
   };
@@ -20,17 +20,33 @@ export type Tables = {
     fan_link_id: string;
     platform: string;
     url: string;
-    position?: number;
-    icon?: string;
+    position?: number | null;
+    icon?: string | null;
     created_at: string;
   };
   profiles: {
     id: string;
-    username?: string;
-    full_name?: string;
-    avatar_url?: string;
-    website?: string;
+    username?: string | null;
+    full_name?: string | null;
+    avatar_url?: string | null;
+    website?: string | null;
     created_at: string;
     updated_at: string;
+  };
+};
+
+export type TablesInsert = {
+  fan_links: Omit<Tables['fan_links'], 'id' | 'created_at' | 'updated_at'> & {
+    id?: string;
+    created_at?: string;
+    updated_at?: string;
+  };
+  streaming_links: Omit<Tables['streaming_links'], 'id' | 'created_at'> & {
+    id?: string;
+    created_at?: string;
+  };
+  profiles: Omit<Tables['profiles'], 'created_at' | 'updated_at'> & {
+    created_at?: string;
+    updated_at?: string;
   };
 };
