@@ -9,7 +9,119 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      fan_links: {
+        Row: {
+          artist: string
+          background_color: string | null
+          button_color: string | null
+          button_text_color: string | null
+          cover_image: string | null
+          created_at: string
+          id: string
+          slug: string
+          text_color: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          artist: string
+          background_color?: string | null
+          button_color?: string | null
+          button_text_color?: string | null
+          cover_image?: string | null
+          created_at?: string
+          id?: string
+          slug: string
+          text_color?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          artist?: string
+          background_color?: string | null
+          button_color?: string | null
+          button_text_color?: string | null
+          cover_image?: string | null
+          created_at?: string
+          id?: string
+          slug?: string
+          text_color?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+          username: string | null
+          website: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+          username?: string | null
+          website?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          username?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      streaming_links: {
+        Row: {
+          created_at: string
+          fan_link_id: string
+          icon: string | null
+          id: string
+          platform: string
+          position: number | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          fan_link_id: string
+          icon?: string | null
+          id?: string
+          platform: string
+          position?: number | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          fan_link_id?: string
+          icon?: string | null
+          id?: string
+          platform?: string
+          position?: number | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streaming_links_fan_link_id_fkey"
+            columns: ["fan_link_id"]
+            isOneToOne: false
+            referencedRelation: "fan_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

@@ -7,10 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { FanLinkPreview } from "./FanLinkPreview";
 import { FanLink } from "@/types/fanlink";
 import { Music, Image, Link2, Save } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export function CreateFanLink() {
   const navigate = useNavigate();
@@ -98,36 +99,69 @@ export function CreateFanLink() {
     e.preventDefault();
     
     if (!fanLink.track_name) {
-      toast({
-        variant: "destructive",
-        title: "Missing information",
-        description: "Please add a track name."
-      });
+      toast.error("Please add a track name.");
       return;
     }
     
     setIsSubmitting(true);
     
     try {
-      // This would save to Supabase in a real implementation
-      console.log("Saving FanLink:", fanLink);
+      const { data: userData, error: userError } = await supabase.auth.getUser();
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (userError || !userData.user) {
+        toast.error("You must be logged in to create links.");
+        return;
+      }
       
-      toast({
-        title: "FanLink created!",
-        description: "Your music link has been created successfully."
-      });
+      // Generate a slug from the track name
+      const slug = fanLink.track_name
+        .toLowerCase()
+        .replace(/[^\w\s]/gi, '')
+        .replace(/\s+/g, '-');
       
+      // Insert into fan_links table
+      const { data: linkData, error: linkError } = await supabase
+        .from('fan_links')
+        .insert({
+          title: fanLink.track_name,
+          artist: "Artist Name", // Default value until we have user profiles
+          user_id: userData.user.id,
+          slug: slug,
+          cover_image: fanLink.cover_art_url,
+          background_color: fanLink.background_color
+        })
+        .select()
+        .single();
+      
+      if (linkError) {
+        throw new Error(linkError.message);
+      }
+      
+      // Insert streaming links
+      const streamingLinks = Object.entries(fanLink.streaming_links).filter(([_, url]) => url);
+      
+      if (streamingLinks.length > 0) {
+        const linksToInsert = streamingLinks.map(([platform, url], index) => ({
+          fan_link_id: linkData.id,
+          platform,
+          url,
+          position: index
+        }));
+        
+        const { error: streamingError } = await supabase
+          .from('streaming_links')
+          .insert(linksToInsert);
+        
+        if (streamingError) {
+          console.error("Error adding streaming links:", streamingError);
+        }
+      }
+      
+      toast.success("Your music link has been created successfully!");
       navigate("/dashboard");
     } catch (error) {
       console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Failed to create FanLink",
-        description: "There was an error saving your music link."
-      });
+      toast.error("There was an error saving your music link.");
     } finally {
       setIsSubmitting(false);
     }
