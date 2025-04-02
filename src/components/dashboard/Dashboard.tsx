@@ -8,6 +8,7 @@ import { dummyFanLinks } from "@/lib/dummy-data";
 import { FanLink } from "@/types/fanlink";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Tables } from "@/types/supabase";
 
 export function Dashboard() {
   const [fanLinks, setFanLinks] = useState<FanLink[]>([]);
@@ -34,7 +35,7 @@ export function Dashboard() {
         
         // Fetch from Supabase
         const { data, error } = await supabase
-          .from('fan_links')
+          .from<Tables["fan_links"]>('fan_links')
           .select(`
             *,
             streaming_links(*)

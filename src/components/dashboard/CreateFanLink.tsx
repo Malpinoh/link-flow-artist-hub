@@ -12,6 +12,7 @@ import { FanLinkPreview } from "./FanLinkPreview";
 import { FanLink } from "@/types/fanlink";
 import { Music, Image, Link2, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Tables } from "@/types/supabase";
 
 export function CreateFanLink() {
   const navigate = useNavigate();
@@ -121,7 +122,7 @@ export function CreateFanLink() {
       
       // Insert into fan_links table
       const { data: linkData, error: linkError } = await supabase
-        .from('fan_links')
+        .from<Tables["fan_links"]>('fan_links')
         .insert({
           title: fanLink.track_name,
           artist: "Artist Name", // Default value until we have user profiles
@@ -129,7 +130,7 @@ export function CreateFanLink() {
           slug: slug,
           cover_image: fanLink.cover_art_url,
           background_color: fanLink.background_color
-        })
+        } as Tables["fan_links"])
         .select()
         .single();
       
@@ -140,17 +141,17 @@ export function CreateFanLink() {
       // Insert streaming links
       const streamingLinks = Object.entries(fanLink.streaming_links).filter(([_, url]) => url);
       
-      if (streamingLinks.length > 0) {
+      if (streamingLinks.length > 0 && linkData) {
         const linksToInsert = streamingLinks.map(([platform, url], index) => ({
           fan_link_id: linkData.id,
           platform,
           url,
           position: index
-        }));
+        } as Partial<Tables["streaming_links"]>));
         
         const { error: streamingError } = await supabase
-          .from('streaming_links')
-          .insert(linksToInsert);
+          .from<Tables["streaming_links"]>('streaming_links')
+          .insert(linksToInsert as any);
         
         if (streamingError) {
           console.error("Error adding streaming links:", streamingError);

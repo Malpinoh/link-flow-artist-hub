@@ -7,6 +7,7 @@ import { FanLink } from "@/types/fanlink";
 import { Music } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Tables } from "@/types/supabase";
 
 export function FanLinkPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -33,12 +34,12 @@ export function FanLinkPage() {
         
         // Fetch from Supabase
         const { data, error } = await supabase
-          .from('fan_links')
+          .from<Tables["fan_links"]>('fan_links')
           .select(`
             *,
             streaming_links(*)
           `)
-          .eq('slug', slug)
+          .eq('slug', slug as string)
           .single();
         
         if (error) {
