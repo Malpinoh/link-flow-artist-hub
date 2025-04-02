@@ -62,7 +62,7 @@ export function FanLinkPage() {
           streaming_links: {},
           cta_button_text: "Stream Now",
           background_color: data.background_color || undefined,
-          background_image_url: data.background_color ? undefined : data.cover_image, // Use cover_image as background if available
+          background_image_url: data.background_color ? undefined : data.cover_image, // Use cover image as background if no background color
           created_at: data.created_at,
           slug: data.slug
         };
