@@ -1,4 +1,5 @@
 
+
 export type Tables = {
   fan_links: {
     id: string;
@@ -11,7 +12,7 @@ export type Tables = {
     text_color?: string | null;
     button_color?: string | null;
     button_text_color?: string | null;
-    background_image_url?: string | null;  // Ensuring this matches the database field name
+    background_image?: string | null;  // Changed to match the database field name
     created_at: string;
     updated_at: string;
   };

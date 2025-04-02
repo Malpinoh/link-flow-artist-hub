@@ -65,7 +65,7 @@ export function Dashboard() {
             streaming_links: {},
             cta_button_text: "Stream Now",
             background_color: link.background_color || undefined,
-            background_image_url: link.background_image_url || undefined,
+            background_image_url: link.background_image || undefined, // Changed to match the database field name
             created_at: link.created_at,
             slug: link.slug
           };

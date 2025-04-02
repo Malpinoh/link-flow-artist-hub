@@ -62,7 +62,7 @@ export function FanLinkPage() {
           streaming_links: {},
           cta_button_text: "Stream Now",
           background_color: data.background_color || undefined,
-          background_image_url: data.background_image_url || undefined,
+          background_image_url: data.background_image || undefined, // Changed to match the database field name
           created_at: data.created_at,
           slug: data.slug
         };
