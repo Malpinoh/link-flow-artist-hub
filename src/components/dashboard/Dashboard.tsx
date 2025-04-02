@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -65,7 +64,7 @@ export function Dashboard() {
             streaming_links: {},
             cta_button_text: "Stream Now",
             background_color: link.background_color || undefined,
-            background_image_url: link.background_image || undefined,
+            background_image_url: link.background_image_url || undefined,
             created_at: link.created_at,
             slug: link.slug
           };
