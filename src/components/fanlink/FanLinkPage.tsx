@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,12 +45,14 @@ export function FanLinkPage() {
         }, {});
         
         // Combine data - using button_text from the database, falling back to "Listen Now" if not available
-        setFanLink({
+        const processedFanLink = {
           ...fanLinkData,
           streaming_links: streamingLinks,
           // Map button_text for compatibility with FanLink type
           cta_button_text: fanLinkData.button_text || "Listen Now"
-        });
+        };
+        
+        setFanLink(processedFanLink);
       } catch (err: any) {
         console.error('Error fetching fan link:', err);
         setError(err.message);
@@ -152,7 +153,6 @@ export function FanLinkPage() {
   );
 }
 
-// Helper functions to get platform colors and names
 function getPlatformColor(platform: string): string {
   const colors: Record<string, string> = {
     spotify: "#1DB954",

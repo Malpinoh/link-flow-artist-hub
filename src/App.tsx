@@ -10,6 +10,10 @@ import FanLink from "./pages/FanLink";
 import NotFound from "./pages/NotFound";
 import Resources from "./pages/Resources";
 import Legal from "./pages/Legal";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import GDPR from "./pages/GDPR";
+import HelpCenter from "./pages/HelpCenter";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -40,6 +44,10 @@ const App = () => {
             <Route path="/l/:slug" element={<FanLink />} /> {/* Short URL alternative */}
             <Route path="/resources" element={<Resources />} />
             <Route path="/legal" element={<Legal />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/gdpr" element={<GDPR />} />
+            <Route path="/help" element={<HelpCenter />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
