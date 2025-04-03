@@ -1,132 +1,190 @@
 
-import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { FanLinkPreview } from "@/components/dashboard/FanLinkPreview";
-import { dummyFanLinks } from "@/lib/dummy-data";
-import { FanLink } from "@/types/fanlink";
-import { Music } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { FanLink } from "@/types/fanlink";
 
 export function FanLinkPage() {
-  const { slug } = useParams<{ slug: string }>();
-  const [fanLink, setFanLink] = useState<FanLink | null>(null);
+  const { slug } = useParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [fanLink, setFanLink] = useState<any | null>(null);
+  
   useEffect(() => {
-    async function fetchFanLink() {
+    const fetchFanLink = async () => {
       try {
         setLoading(true);
         
-        if (import.meta.env.DEV && !import.meta.env.VITE_USE_SUPABASE) {
-          // Use dummy data in development if not using Supabase
-          const found = dummyFanLinks.find(link => link.slug === slug);
-          
-          if (found) {
-            setFanLink(found);
-          } else {
-            setError("Link not found");
-          }
-          return;
-        }
-        
-        // Fetch from Supabase with correct typing
-        const { data, error } = await supabase
+        // First, get the fan link by slug
+        const { data: fanLinkData, error: fanLinkError } = await supabase
           .from('fan_links')
-          .select(`
-            *,
-            streaming_links(*)
-          `)
-          .eq('slug', slug as string)
+          .select('*')
+          .eq('slug', slug)
           .single();
-        
-        if (error) {
-          console.error('Error fetching fan link:', error);
-          setError("Failed to load link");
-          toast.error("Error loading link");
-          return;
+          
+        if (fanLinkError) {
+          throw new Error('Fan link not found');
         }
         
-        if (!data) {
-          setError("Link not found");
-          return;
+        // Then, get the streaming links for this fan link
+        const { data: streamingLinksData, error: streamingLinksError } = await supabase
+          .from('streaming_links')
+          .select('*')
+          .eq('fan_link_id', fanLinkData.id)
+          .order('position', { ascending: true });
+          
+        if (streamingLinksError) {
+          console.error('Error fetching streaming links:', streamingLinksError);
         }
         
-        console.log("Fetched data from Supabase:", data);
+        // Convert streaming links to the format expected by FanLink type
+        const streamingLinks = streamingLinksData.reduce((acc: Record<string, string>, link: any) => {
+          acc[link.platform] = link.url;
+          return acc;
+        }, {});
         
-        // Transform the data to match our FanLink type
-        const transformedData: FanLink = {
-          id: data.id,
-          artist_id: data.user_id,
-          track_name: data.title,
-          cover_art_url: data.cover_image || "",
-          streaming_links: {},
-          cta_button_text: data.button_text || "Stream Now",
-          background_color: data.background_color || undefined,
-          background_image_url: data.background_color ? undefined : data.cover_image, // Use cover image as background if no background color
-          created_at: data.created_at,
-          slug: data.slug
-        };
-        
-        // Transform streaming links
-        if (data.streaming_links) {
-          data.streaming_links.forEach((link: any) => {
-            transformedData.streaming_links[link.platform as keyof typeof transformedData.streaming_links] = link.url;
-          });
-        }
-        
-        setFanLink(transformedData);
-      } catch (err) {
-        console.error("Failed to load link:", err);
-        setError("Failed to load link");
-        toast.error("Error loading link");
+        // Combine data
+        setFanLink({
+          ...fanLinkData,
+          streaming_links: streamingLinks,
+          // Map button_text for compatibility with FanLink type
+          cta_button_text: fanLinkData.button_text || "Listen Now"
+        });
+      } catch (err: any) {
+        console.error('Error fetching fan link:', err);
+        setError(err.message);
       } finally {
         setLoading(false);
       }
-    }
+    };
     
-    fetchFanLink();
+    if (slug) {
+      fetchFanLink();
+    }
   }, [slug]);
-
+  
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="h-12 w-12 rounded-full music-gradient flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <Music size={24} className="text-white" />
-          </div>
-          <p className="text-muted-foreground">Loading music link...</p>
-        </div>
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
-
+  
   if (error || !fanLink) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center max-w-md p-6">
-          <div className="h-12 w-12 rounded-full bg-destructive flex items-center justify-center mx-auto mb-4">
-            <Music size={24} className="text-white" />
-          </div>
-          <h1 className="text-2xl font-bold mb-2">Link Not Found</h1>
-          <p className="text-muted-foreground mb-6">
-            We couldn't find the music link you're looking for. It may have been removed or the URL is incorrect.
-          </p>
-          <a href="/" className="text-primary underline">
-            Return to homepage
-          </a>
-        </div>
+      <div className="flex flex-col items-center justify-center h-screen space-y-4 p-4 text-center">
+        <h1 className="text-3xl font-bold">Link Not Found</h1>
+        <p className="text-muted-foreground">The link you're looking for doesn't exist or has been removed.</p>
+        <Button asChild>
+          <Link to="/">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Return Home
+          </Link>
+        </Button>
       </div>
     );
   }
-
+  
+  const bgStyle = fanLink.background_image_url
+    ? { backgroundImage: `url(${fanLink.background_image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : { backgroundColor: fanLink.background_color || '#3a10e5' };
+    
+  const textStyle = { color: fanLink.text_color || '#ffffff' };
+  
+  const fanLinkFormatted: FanLink = {
+    track_name: fanLink.title,
+    cover_art_url: fanLink.cover_image,
+    streaming_links: fanLink.streaming_links || {},
+    cta_button_text: fanLink.cta_button_text || "Listen Now",
+    background_color: fanLink.background_color,
+    background_image_url: fanLink.background_image_url,
+    slug: fanLink.slug
+  };
+  
   return (
-    <div className="min-h-screen flex flex-col">
-      <FanLinkPreview fanLink={fanLink} isPreview={false} />
-      <div className="py-4 text-center text-xs text-muted-foreground">
-        <p>Created with MALPINOHDISTRO LINK</p>
-      </div>
+    <div className="flex flex-col min-h-screen" style={bgStyle}>
+      <main className="flex-grow flex items-center justify-center p-4 py-10">
+        <div className="w-full max-w-md bg-black/30 backdrop-blur-md rounded-2xl p-8 shadow-lg" style={textStyle}>
+          <div className="flex flex-col items-center">
+            <div className="h-48 w-48 rounded-lg overflow-hidden mb-6 shadow-lg">
+              {fanLink.cover_image ? (
+                <img
+                  src={fanLink.cover_image}
+                  alt={fanLink.title}
+                  className="h-full w-full object-cover"
+                />
+              ) : null}
+            </div>
+            
+            <div className="text-center mb-8 w-full">
+              <h1 className="text-2xl font-bold mb-1">{fanLink.title}</h1>
+              <p className="opacity-80">{fanLink.artist}</p>
+            </div>
+            
+            <div className="w-full space-y-3">
+              {/* Streaming buttons */}
+              {Object.entries(fanLink.streaming_links || {}).map(([platform, url]) => (
+                <a
+                  key={platform}
+                  href={url as string}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center w-full p-3 rounded-md transition-all hover:opacity-90 text-white"
+                  style={{ backgroundColor: getPlatformColor(platform) }}
+                >
+                  {getPlatformName(platform)}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
+      
+      <footer className="py-4 text-center text-xs" style={textStyle}>
+        <p className="opacity-60">
+          <Link to="/" className="hover:underline">Create your own music link page</Link>
+        </p>
+      </footer>
     </div>
   );
+}
+
+// Helper functions to get platform colors and names
+function getPlatformColor(platform: string): string {
+  const colors: Record<string, string> = {
+    spotify: "#1DB954",
+    apple_music: "#FA2D48",
+    youtube: "#FF0000",
+    youtube_music: "#FF0000",
+    soundcloud: "#FF7700",
+    tidal: "#000000",
+    audiomack: "#FFA500",
+    boomplay: "#E72C30",
+    deezer: "#00C7F2",
+    bandcamp: "#1DA0C3",
+    amazon_music: "#00A8E1"
+  };
+  
+  return colors[platform] || "#333333";
+}
+
+function getPlatformName(platform: string): string {
+  const names: Record<string, string> = {
+    spotify: "Spotify",
+    apple_music: "Apple Music",
+    youtube: "YouTube",
+    youtube_music: "YouTube Music",
+    soundcloud: "SoundCloud",
+    tidal: "TIDAL",
+    audiomack: "Audiomack",
+    boomplay: "Boomplay",
+    deezer: "Deezer",
+    bandcamp: "Bandcamp",
+    amazon_music: "Amazon Music"
+  };
+  
+  return names[platform] || platform.charAt(0).toUpperCase() + platform.slice(1);
 }

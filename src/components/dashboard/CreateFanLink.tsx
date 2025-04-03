@@ -1,11 +1,9 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { FormField, FormLabel } from "@/components/ui/form";
+import { FormLabel } from "@/components/ui/form";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { FanLinkPreview } from "./FanLinkPreview";
 import { Music, Plus, Image, Upload, X, Trash, Check, ExternalLink } from "lucide-react";
@@ -13,6 +11,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from "@/integrations/supabase/client";
+import { FanLink } from "@/types/fanlink";
 
 const MUSIC_PLATFORMS = [
   { id: "spotify", name: "Spotify" },
@@ -44,14 +43,12 @@ export const CreateFanLink = () => {
   const [platform, setPlatform] = useState("");
   const [url, setUrl] = useState("");
   
-  // Generate a slug based on the title
   const generateSlug = () => {
     if (title) {
       const baseSlug = title.toLowerCase()
         .replace(/\s+/g, '-')
         .replace(/[^\w-]+/g, '');
       
-      // Add a short random string to make it unique
       const randomString = Math.random().toString(36).substring(2, 6);
       setSlug(`${baseSlug}-${randomString}`);
     }
@@ -122,7 +119,6 @@ export const CreateFanLink = () => {
     setIsLoading(true);
     
     try {
-      // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -131,7 +127,6 @@ export const CreateFanLink = () => {
         return;
       }
       
-      // Create a new fan link
       const { data: fanLink, error: fanLinkError } = await supabase.from('fan_links').insert({
         title,
         artist,
@@ -146,7 +141,6 @@ export const CreateFanLink = () => {
       
       if (fanLinkError) throw fanLinkError;
       
-      // Add streaming links
       const streamingLinksData = streamingLinks.map((link, index) => ({
         fan_link_id: fanLink.id,
         platform: link.platform,
@@ -166,6 +160,17 @@ export const CreateFanLink = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  const previewFanLink: FanLink = {
+    track_name: title || "Your Track Title",
+    cover_art_url: coverImage || "https://placehold.co/500x500/111/333?text=Cover+Art",
+    cta_button_text: buttonText,
+    background_color: backgroundColor,
+    streaming_links: streamingLinks.reduce((acc, link) => {
+      acc[link.platform] = link.url;
+      return acc;
+    }, {} as Record<string, string>)
   };
   
   return (
@@ -498,18 +503,8 @@ export const CreateFanLink = () => {
           <h2 className="font-medium text-lg mb-4">Preview</h2>
           <div className="border rounded-md overflow-hidden">
             <FanLinkPreview
-              title={title || "Your Track Title"}
-              artist={artist || "Artist Name"}
-              coverImage={coverImage || "https://placehold.co/500x500/111/333?text=Cover+Art"}
-              backgroundColor={backgroundColor}
-              textColor={textColor}
-              buttonColor={buttonColor}
-              buttonTextColor={buttonTextColor}
-              buttonText={buttonText}
-              streamingLinks={streamingLinks.map(link => ({
-                platform: link.platform,
-                url: link.url
-              }))}
+              fanLink={previewFanLink}
+              isPreview={true}
             />
           </div>
         </div>

@@ -1,5 +1,13 @@
 
-import { FanLink } from "@/types/fanlink";
+import { FanLink, Artist } from "@/types/fanlink";
+
+export const dummyArtist: Artist = {
+  id: "123",
+  name: "Demo Artist",
+  email: "demo@artist.com",
+  avatar_url: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=300&fit=crop&auto=format",
+  bio: "This is a demo artist for preview purposes"
+};
 
 export const dummyFanLinks: FanLink[] = [
   {
