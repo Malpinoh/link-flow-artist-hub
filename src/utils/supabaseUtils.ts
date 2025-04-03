@@ -11,6 +11,8 @@ export const subscribeToFanLinks = (
   userId: string,
   onLinkChange: (eventType: 'INSERT' | 'UPDATE' | 'DELETE', payload: any) => void
 ) => {
+  console.log('Setting up real-time subscription for user:', userId);
+  
   const channel = supabase
     .channel('fan-links-realtime')
     .on(
@@ -22,7 +24,7 @@ export const subscribeToFanLinks = (
         filter: `user_id=eq.${userId}`, // Only listen to changes for this user
       },
       (payload) => {
-        console.log('Realtime fan_links update:', payload);
+        console.log('Realtime fan_links update received:', payload);
         onLinkChange(payload.eventType as any, payload);
       }
     )
@@ -34,7 +36,7 @@ export const subscribeToFanLinks = (
         table: 'streaming_links',
       },
       (payload) => {
-        console.log('Realtime streaming_links update:', payload);
+        console.log('Realtime streaming_links update received:', payload);
         // For any streaming_links changes, we'll just trigger a general update
         // since we need to refetch all links to get the complete data
         onLinkChange('UPDATE', payload);
@@ -42,8 +44,11 @@ export const subscribeToFanLinks = (
     )
     .subscribe();
 
+  console.log('Real-time subscription setup complete');
+  
   // Return unsubscribe function
   return () => {
+    console.log('Unsubscribing from real-time updates');
     supabase.removeChannel(channel);
   };
 };
@@ -54,11 +59,12 @@ export const subscribeToFanLinks = (
  */
 export const enableRealtimeForTables = async () => {
   try {
-    // No need to execute any SQL as Supabase automatically handles this through the client
-    console.log('Real-time enabled for fan_links and streaming_links tables');
+    // We don't need to execute any SQL here as the tables are already enabled for real-time
+    // This was confirmed by the error message that the tables are already part of supabase_realtime
+    console.log('Real-time is already enabled for fan_links and streaming_links tables');
     return true;
   } catch (error) {
-    console.error('Error enabling real-time for tables:', error);
+    console.error('Error checking real-time for tables:', error);
     return false;
   }
 };

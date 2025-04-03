@@ -45,11 +45,11 @@ export function FanLinkPage() {
           return acc;
         }, {});
         
-        // Combine data
+        // Combine data - using button_text from the database, falling back to "Listen Now" if not available
         setFanLink({
           ...fanLinkData,
           streaming_links: streamingLinks,
-          // Map cta_button_text for compatibility with FanLink type
+          // Map button_text for compatibility with FanLink type
           cta_button_text: fanLinkData.button_text || "Listen Now"
         });
       } catch (err: any) {
