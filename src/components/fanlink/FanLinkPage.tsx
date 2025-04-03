@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -88,20 +87,20 @@ export function FanLinkPage() {
     );
   }
   
-  const bgStyle = fanLink.background_image_url
+  const bgStyle = fanLink?.background_image_url
     ? { backgroundImage: `url(${fanLink.background_image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-    : { backgroundColor: fanLink.background_color || '#3a10e5' };
+    : { backgroundColor: fanLink?.background_color || '#3a10e5' };
     
-  const textStyle = { color: fanLink.text_color || '#ffffff' };
+  const textStyle = { color: fanLink?.text_color || '#ffffff' };
   
   const fanLinkFormatted: FanLink = {
-    track_name: fanLink.title,
-    cover_art_url: fanLink.cover_image,
-    streaming_links: fanLink.streaming_links || {},
-    cta_button_text: fanLink.cta_button_text || "Listen Now",
-    background_color: fanLink.background_color,
-    background_image_url: fanLink.background_image_url,
-    slug: fanLink.slug
+    track_name: fanLink?.title,
+    cover_art_url: fanLink?.cover_image,
+    streaming_links: fanLink?.streaming_links || {},
+    cta_button_text: fanLink?.cta_button_text || "Listen Now",
+    background_color: fanLink?.background_color,
+    background_image_url: fanLink?.background_image_url,
+    slug: fanLink?.slug
   };
   
   return (
