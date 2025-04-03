@@ -51,11 +51,5 @@ export const AuthStatus = () => {
     );
   }
 
-  return (
-    <Button asChild size="sm">
-      <Link to="/dashboard">
-        Sign In
-      </Link>
-    </Button>
-  );
+  return null; // Don't render sign in button here to avoid duplication
 };

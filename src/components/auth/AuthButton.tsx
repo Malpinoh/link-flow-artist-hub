@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { LogIn, LogOut, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface AuthButtonProps {
   onAuthChange?: (isAuthenticated: boolean) => void;
@@ -12,6 +13,7 @@ interface AuthButtonProps {
 export function AuthButton({ onAuthChange }: AuthButtonProps) {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function getUser() {
@@ -34,9 +36,16 @@ export function AuthButton({ onAuthChange }: AuthButtonProps) {
 
     // Subscribe to auth changes
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth event:", event);
       setUser(session?.user || null);
       if (onAuthChange) {
         onAuthChange(!!session?.user);
+      }
+      
+      // Redirect to dashboard on login
+      if (event === 'SIGNED_IN') {
+        toast.success("Successfully signed in!");
+        navigate('/dashboard');
       }
     });
 
@@ -45,20 +54,13 @@ export function AuthButton({ onAuthChange }: AuthButtonProps) {
     return () => {
       authListener?.subscription.unsubscribe();
     };
-  }, [onAuthChange]);
+  }, [onAuthChange, navigate]);
 
   const handleLogin = async () => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-        },
-      });
-      if (error) {
-        toast.error("Sign in failed. Please try again.");
-      }
+      // For email/password login, use the login page instead
+      navigate('/');
     } catch (err) {
       console.error("Sign in error:", err);
       toast.error("Sign in failed. Please try again.");
@@ -72,6 +74,7 @@ export function AuthButton({ onAuthChange }: AuthButtonProps) {
       setLoading(true);
       await supabase.auth.signOut();
       toast.success("You have been signed out");
+      navigate('/');
     } catch (err) {
       console.error("Sign out error:", err);
       toast.error("Sign out failed. Please try again.");

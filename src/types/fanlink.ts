@@ -10,6 +10,13 @@ export interface FanLink {
     youtube?: string;
     soundcloud?: string;
     tidal?: string;
+    audiomack?: string;
+    boomplay?: string;
+    deezer?: string;
+    youtube_music?: string;
+    bandcamp?: string;
+    amazon_music?: string;
+    [key: string]: string | undefined;
   };
   pre_save_links?: {
     spotify?: string;
@@ -20,6 +27,7 @@ export interface FanLink {
   background_image_url?: string;
   created_at?: string;
   slug?: string;
+  button_text?: string; // Added this field to match Supabase schema
 }
 
 export interface Artist {
@@ -28,4 +36,10 @@ export interface Artist {
   email?: string;
   avatar_url?: string;
   bio?: string;
+}
+
+export interface StreamingPlatform {
+  id: string;
+  name: string;
+  icon?: string;
 }
