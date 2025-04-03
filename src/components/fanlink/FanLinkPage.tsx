@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,7 +49,7 @@ export function FanLinkPage() {
         setFanLink({
           ...fanLinkData,
           streaming_links: streamingLinks,
-          // Map button_text for compatibility with FanLink type
+          // Map cta_button_text for compatibility with FanLink type
           cta_button_text: fanLinkData.button_text || "Listen Now"
         });
       } catch (err: any) {

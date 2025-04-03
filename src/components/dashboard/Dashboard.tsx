@@ -38,6 +38,35 @@ export function Dashboard() {
     checkAuth();
   }, [navigate]);
   
+  // Transform Supabase data to FanLink format
+  const transformFanLinkData = (data: any[]): FanLink[] => {
+    if (!data || data.length === 0) return [];
+    
+    return data.map((link: any) => {
+      const fanLink: FanLink = {
+        id: link.id,
+        artist_id: link.user_id,
+        track_name: link.title,
+        cover_art_url: link.cover_image || "",
+        streaming_links: {},
+        cta_button_text: link.button_text || "Stream Now",
+        background_color: link.background_color || undefined,
+        background_image_url: link.background_color ? undefined : link.cover_image, // Use cover_image as background if available
+        created_at: link.created_at,
+        slug: link.slug
+      };
+      
+      // Transform streaming links
+      if (link.streaming_links) {
+        link.streaming_links.forEach((streamLink: any) => {
+          fanLink.streaming_links[streamLink.platform as keyof typeof fanLink.streaming_links] = streamLink.url;
+        });
+      }
+      
+      return fanLink;
+    });
+  };
+  
   // Fetch user's fan links
   useEffect(() => {
     if (!authChecked) return;
@@ -77,39 +106,8 @@ export function Dashboard() {
           return;
         }
         
-        if (!data || data.length === 0) {
-          setFanLinks([]);
-          return;
-        }
-        
         console.log("Fetched links data:", data);
-        
-        // Transform the data to match our FanLink type
-        const transformedData: FanLink[] = data.map((link: any) => {
-          const fanLink: FanLink = {
-            id: link.id,
-            artist_id: link.user_id,
-            track_name: link.title,
-            cover_art_url: link.cover_image || "",
-            streaming_links: {},
-            cta_button_text: link.button_text || "Stream Now",
-            background_color: link.background_color || undefined,
-            background_image_url: link.background_color ? undefined : link.cover_image, // Use cover_image as background if available
-            created_at: link.created_at,
-            slug: link.slug
-          };
-          
-          // Transform streaming links
-          if (link.streaming_links) {
-            link.streaming_links.forEach((streamLink: any) => {
-              fanLink.streaming_links[streamLink.platform as keyof typeof fanLink.streaming_links] = streamLink.url;
-            });
-          }
-          
-          return fanLink;
-        });
-        
-        setFanLinks(transformedData);
+        setFanLinks(transformFanLinkData(data || []));
       } catch (err) {
         console.error("Failed to load links:", err);
         toast.error("Error loading your links");
@@ -120,6 +118,110 @@ export function Dashboard() {
     }
     
     fetchFanLinks();
+  }, [authChecked]);
+  
+  // Set up real-time subscriptions for dashboard updates
+  useEffect(() => {
+    if (!authChecked) return;
+    
+    // Get the current user
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      return data.user;
+    };
+    
+    // Subscribe to real-time events
+    const setupRealtime = async () => {
+      const user = await getUser();
+      if (!user) return;
+      
+      // Subscribe to fan_links table changes
+      const channel = supabase
+        .channel('fan-links-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+            schema: 'public',
+            table: 'fan_links',
+            filter: `user_id=eq.${user.id}`, // Only listen to changes for the current user
+          },
+          async (payload) => {
+            console.log('Real-time fan link change:', payload);
+            
+            // Refetch all links to ensure we have the most up-to-date data
+            try {
+              const { data, error } = await supabase
+                .from('fan_links')
+                .select(`
+                  *,
+                  streaming_links(*)
+                `)
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+              
+              if (!error && data) {
+                console.log('Refreshed fan links data after real-time event:', data);
+                setFanLinks(transformFanLinkData(data));
+                
+                if (payload.eventType === 'INSERT') {
+                  toast.success('New link created!');
+                } else if (payload.eventType === 'UPDATE') {
+                  toast.success('Link updated!');
+                } else if (payload.eventType === 'DELETE') {
+                  toast.info('Link deleted');
+                }
+              }
+            } catch (err) {
+              console.error('Error refreshing fan links:', err);
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*', // Listen to all events
+            schema: 'public',
+            table: 'streaming_links',
+          },
+          async (payload) => {
+            console.log('Real-time streaming link change:', payload);
+            
+            // If the streaming links change, we need to refetch all fan links
+            // to ensure we have the correct relationships
+            try {
+              const { data, error } = await supabase
+                .from('fan_links')
+                .select(`
+                  *,
+                  streaming_links(*)
+                `)
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+              
+              if (!error && data) {
+                console.log('Refreshed fan links data after streaming link change:', data);
+                setFanLinks(transformFanLinkData(data));
+              }
+            } catch (err) {
+              console.error('Error refreshing fan links after streaming link change:', err);
+            }
+          }
+        )
+        .subscribe();
+      
+      // Return an unsubscribe function
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    };
+    
+    const unsubscribe = setupRealtime();
+    
+    // Clean up subscription when component unmounts
+    return () => {
+      unsubscribe.then(unsubFn => unsubFn && unsubFn());
+    };
   }, [authChecked]);
   
   if (!authChecked || loading) {
