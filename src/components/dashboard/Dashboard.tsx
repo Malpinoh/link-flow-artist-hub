@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PlusCircle, ExternalLink, Calendar, Edit, Loader2 } from "lucide-react";
-import { dummyFanLinks } from "@/lib/dummy-data";
 import { FanLink } from "@/types/fanlink";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -93,13 +92,7 @@ export function Dashboard() {
     try {
       setLoading(true);
       
-      if (import.meta.env.DEV && !import.meta.env.VITE_USE_SUPABASE) {
-        // Use dummy data in development if not using Supabase
-        setFanLinks(dummyFanLinks);
-        setLoading(false);
-        return;
-      }
-      
+      // Always use Supabase data - remove any reference to dummy data
       // Fetch from Supabase with correct typing
       const { data, error } = await supabase
         .from('fan_links')

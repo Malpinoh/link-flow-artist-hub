@@ -13,51 +13,56 @@ export const subscribeToFanLinks = (
 ) => {
   console.log('Setting up real-time subscription for user:', userId);
   
-  // Enable realtime for tables if needed
-  enableRealtimeForTables().catch(err => {
-    console.error("Error enabling realtime:", err);
-  });
-  
-  const channel = supabase
-    .channel('fan-links-realtime')
-    .on(
-      'postgres_changes',
-      {
-        event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
-        schema: 'public',
-        table: 'fan_links',
-        filter: `user_id=eq.${userId}`, // Only listen to changes for this user
-      },
-      (payload) => {
-        console.log('Realtime fan_links update received:', payload);
-        onLinkChange(payload.eventType as any, payload);
-      }
-    )
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'streaming_links',
-      },
-      (payload) => {
-        console.log('Realtime streaming_links update received:', payload);
-        // For any streaming_links changes, we'll just trigger a general update
-        // since we need to refetch all links to get the complete data
-        onLinkChange('UPDATE', payload);
-      }
-    )
-    .subscribe((status) => {
-      console.log('Realtime subscription status:', status);
+  try {
+    // Enable realtime for tables
+    supabase.rpc('enable_realtime_tables').catch(err => {
+      console.error("Error enabling realtime:", err);
+      // Continue anyway as tables might already be configured
     });
+    
+    const channel = supabase
+      .channel('fan-links-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'fan_links',
+          filter: `user_id=eq.${userId}`, // Only listen to changes for this user
+        },
+        (payload) => {
+          console.log('Realtime fan_links update received:', payload);
+          onLinkChange(payload.eventType as any, payload);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'streaming_links',
+        },
+        (payload) => {
+          console.log('Realtime streaming_links update received:', payload);
+          // For any streaming_links changes, we'll just trigger a general update
+          onLinkChange('UPDATE', payload);
+        }
+      )
+      .subscribe((status) => {
+        console.log('Realtime subscription status:', status);
+      });
 
-  console.log('Real-time subscription setup complete');
-  
-  // Return unsubscribe function
-  return () => {
-    console.log('Unsubscribing from real-time updates');
-    supabase.removeChannel(channel);
-  };
+    console.log('Real-time subscription setup complete');
+    
+    // Return unsubscribe function
+    return () => {
+      console.log('Unsubscribing from real-time updates');
+      supabase.removeChannel(channel);
+    };
+  } catch (error) {
+    console.error("Error setting up real-time subscription:", error);
+    return () => {};
+  }
 };
 
 /**
@@ -66,12 +71,18 @@ export const subscribeToFanLinks = (
  */
 export const enableRealtimeForTables = async () => {
   try {
-    // Since the get_publication_tables RPC is not available, we'll skip this check
-    // and assume the tables are already properly configured for real-time
-    console.log('Skipping publication check - assuming real-time is enabled');
+    // Since direct RPC might not be available, let's use a SQL function call
+    const { error } = await supabase.rpc('enable_realtime_tables');
+    if (error) {
+      console.error('Error enabling realtime:', error);
+      // Continue anyway as tables might already be configured
+    } else {
+      console.log('Successfully enabled realtime for tables');
+    }
     return true;
   } catch (error) {
     console.error('Error checking real-time for tables:', error);
-    return false;
+    // Continue anyway as tables might already be configured
+    return true;
   }
 };
