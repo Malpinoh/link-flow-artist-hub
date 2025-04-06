@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,8 +49,7 @@ export function FanLinkPage() {
         const processedFanLink = {
           ...fanLinkData,
           streaming_links: streamingLinks,
-          // Map button_text for compatibility with FanLink type
-          // Since button_text might not exist in the database schema, default to "Listen Now"
+          // Set a default value for cta_button_text
           cta_button_text: "Listen Now" // Default value since button_text is not in the type
         };
         

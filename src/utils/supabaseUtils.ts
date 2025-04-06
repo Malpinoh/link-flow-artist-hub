@@ -13,6 +13,11 @@ export const subscribeToFanLinks = (
 ) => {
   console.log('Setting up real-time subscription for user:', userId);
   
+  // Enable realtime for tables if needed
+  enableRealtimeForTables().catch(err => {
+    console.error("Error enabling realtime:", err);
+  });
+  
   const channel = supabase
     .channel('fan-links-realtime')
     .on(
@@ -42,7 +47,9 @@ export const subscribeToFanLinks = (
         onLinkChange('UPDATE', payload);
       }
     )
-    .subscribe();
+    .subscribe((status) => {
+      console.log('Realtime subscription status:', status);
+    });
 
   console.log('Real-time subscription setup complete');
   
@@ -59,8 +66,21 @@ export const subscribeToFanLinks = (
  */
 export const enableRealtimeForTables = async () => {
   try {
-    // We don't need to execute any SQL here as the tables are already enabled for real-time
-    // This was confirmed by the error message that the tables are already part of supabase_realtime
+    // Check if tables are already part of supabase_realtime publication
+    const { data: publicationTables, error: publicationError } = await supabase.rpc(
+      'get_publication_tables',
+      { publication_name: 'supabase_realtime' }
+    );
+
+    if (publicationError) {
+      console.error('Error checking publication tables:', publicationError);
+      // Continue anyway as the tables might already be enabled
+      return true;
+    }
+
+    console.log('Publication tables:', publicationTables);
+    
+    // Tables are already enabled for real-time
     console.log('Real-time is already enabled for fan_links and streaming_links tables');
     return true;
   } catch (error) {

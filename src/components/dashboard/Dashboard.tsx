@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -27,19 +28,34 @@ export function Dashboard() {
           toast.info("Please sign in to view your dashboard");
           // User not logged in, redirect to sign in after a short delay
           setTimeout(() => navigate("/"), 1500);
-        } else {
-          setUserId(data.session.user.id);
+          return;
         }
         
+        setUserId(data.session.user.id);
         setAuthChecked(true);
       } catch (error) {
         console.error("Error checking auth:", error);
-        setAuthChecked(true);
+        toast.error("Authentication error. Please try signing in again.");
+        setTimeout(() => navigate("/"), 1500);
       }
     };
     
     checkAuth();
-  }, [navigate]);
+    
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth event:", event);
+      if (!session && authChecked) {
+        // Only redirect if we've already checked auth (prevents double redirects)
+        toast.info("Your session has ended. Please sign in again.");
+        navigate("/");
+      }
+    });
+    
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, [navigate, authChecked]);
   
   // Transform Supabase data to FanLink format
   const transformFanLinkData = useCallback((data: any[]): FanLink[] => {
@@ -122,6 +138,8 @@ export function Dashboard() {
   // Set up real-time subscriptions for dashboard updates
   useEffect(() => {
     if (!authChecked || !userId) return;
+    
+    console.log('Setting up real-time subscription for user:', userId);
     
     const handleRealTimeUpdate = (eventType: 'INSERT' | 'UPDATE' | 'DELETE', payload: any) => {
       console.log(`Real-time event received: ${eventType}`, payload);

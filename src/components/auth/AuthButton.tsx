@@ -16,6 +16,25 @@ export function AuthButton({ onAuthChange }: AuthButtonProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth event:", event);
+      setUser(session?.user || null);
+      if (onAuthChange) {
+        onAuthChange(!!session?.user);
+      }
+      
+      // Redirect to dashboard on login
+      if (event === 'SIGNED_IN') {
+        toast.success("Successfully signed in!");
+        navigate('/dashboard');
+      } else if (event === 'SIGNED_OUT') {
+        toast.success("You have been signed out");
+        navigate('/');
+      }
+    });
+
+    // THEN check for existing session
     async function getUser() {
       try {
         const { data, error } = await supabase.auth.getUser();
@@ -34,25 +53,10 @@ export function AuthButton({ onAuthChange }: AuthButtonProps) {
       }
     }
 
-    // Subscribe to auth changes
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth event:", event);
-      setUser(session?.user || null);
-      if (onAuthChange) {
-        onAuthChange(!!session?.user);
-      }
-      
-      // Redirect to dashboard on login
-      if (event === 'SIGNED_IN') {
-        toast.success("Successfully signed in!");
-        navigate('/dashboard');
-      }
-    });
-
     getUser();
 
     return () => {
-      authListener?.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }, [onAuthChange, navigate]);
 
@@ -73,8 +77,7 @@ export function AuthButton({ onAuthChange }: AuthButtonProps) {
     try {
       setLoading(true);
       await supabase.auth.signOut();
-      toast.success("You have been signed out");
-      navigate('/');
+      // Don't navigate here - let the auth state change handler do it
     } catch (err) {
       console.error("Sign out error:", err);
       toast.error("Sign out failed. Please try again.");
