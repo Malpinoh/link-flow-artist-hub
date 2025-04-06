@@ -165,3 +165,26 @@ export const updateLink = async (
     return null;
   }
 };
+
+/**
+ * Fetch a fan link and its streaming links by ID
+ */
+export const getFanLinkById = async (id: string) => {
+  try {
+    const { data: fanLink, error: fanLinkError } = await supabase
+      .from('fan_links')
+      .select(`
+        *,
+        streaming_links(*)
+      `)
+      .eq('id', id)
+      .single();
+    
+    if (fanLinkError) throw fanLinkError;
+    
+    return fanLink;
+  } catch (error) {
+    console.error("Error fetching fan link:", error);
+    return null;
+  }
+};

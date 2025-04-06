@@ -4,7 +4,8 @@ import { Header } from "@/components/common/Header";
 import { Footer } from "@/components/common/Footer";
 import { Dashboard } from "@/components/dashboard/Dashboard";
 import { CreateFanLink } from "@/components/dashboard/CreateFanLink";
-import { useLocation, useNavigate } from "react-router-dom";
+import { EditFanLink } from "@/components/dashboard/EditFanLink";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -12,7 +13,9 @@ import { Loader2 } from "lucide-react";
 const DashboardPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const isCreating = location.pathname === "/new";
+  const isEditing = location.pathname.startsWith("/edit/");
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
@@ -86,6 +89,8 @@ const DashboardPage = () => {
       <main className="flex-1">
         {isCreating ? (
           <CreateFanLink />
+        ) : isEditing ? (
+          <EditFanLink />
         ) : (
           <Dashboard />
         )}

@@ -14,11 +14,18 @@ export const subscribeToFanLinks = (
   console.log('Setting up real-time subscription for user:', userId);
   
   try {
-    // Enable realtime for tables
-    supabase.rpc('enable_realtime_tables').catch(err => {
-      console.error("Error enabling realtime:", err);
-      // Continue anyway as tables might already be configured
-    });
+    // Enable realtime for tables using rpc
+    const enableRealtime = async () => {
+      try {
+        await supabase.rpc('enable_realtime_tables');
+      } catch (err) {
+        console.error("Error enabling realtime:", err);
+        // Continue anyway as tables might already be configured
+      }
+    };
+    
+    // Call the function but don't wait for it
+    enableRealtime();
     
     const channel = supabase
       .channel('fan-links-realtime')
