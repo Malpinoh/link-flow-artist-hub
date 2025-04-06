@@ -35,7 +35,7 @@ export const subscribeToFanLinks = (
           event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
           schema: 'public',
           table: 'fan_links',
-          filter: `user_id=eq.${userId}`, // Only listen to changes for this user
+          filter: `user_id=eq.${userId}`,
         },
         (payload) => {
           console.log('Realtime fan_links update received:', payload);

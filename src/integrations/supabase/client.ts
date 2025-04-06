@@ -22,9 +22,6 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   },
 });
 
-// Initialize channels by setting auth for realtime
-supabase.realtime.setAuth(SUPABASE_PUBLISHABLE_KEY);
-
 // Enable Realtime subscription for public schema tables (fan_links, streaming_links)
 (async () => {
   try {
