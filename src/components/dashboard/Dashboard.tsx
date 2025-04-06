@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,6 @@ import { dummyFanLinks } from "@/lib/dummy-data";
 import { FanLink } from "@/types/fanlink";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Tables } from "@/types/supabase";
 import { subscribeToFanLinks } from "@/utils/supabaseUtils";
 
 export function Dashboard() {
@@ -60,6 +58,8 @@ export function Dashboard() {
   // Transform Supabase data to FanLink format
   const transformFanLinkData = useCallback((data: any[]): FanLink[] => {
     if (!data || data.length === 0) return [];
+    
+    console.log("Transforming fan link data:", data);
     
     return data.map((link: any) => {
       const fanLink: FanLink = {

@@ -19,14 +19,23 @@ const DashboardPage = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Auth check error:", error);
+          toast.error("Authentication error");
+          navigate('/');
+          return;
+        }
         
         if (!data.session) {
+          console.log("No active session found");
           toast.info("Please sign in to access the dashboard");
           navigate('/');
           return;
         }
         
+        console.log("User authenticated:", data.session.user.id);
         setIsAuthenticated(true);
       } catch (error) {
         console.error("Auth check error:", error);
@@ -40,8 +49,12 @@ const DashboardPage = () => {
     checkAuth();
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state change:", event);
       if (event === 'SIGNED_OUT') {
+        setIsAuthenticated(false);
         navigate('/');
+      } else if (event === 'SIGNED_IN') {
+        setIsAuthenticated(true);
       }
     });
     

@@ -66,22 +66,9 @@ export const subscribeToFanLinks = (
  */
 export const enableRealtimeForTables = async () => {
   try {
-    // Check if tables are already part of supabase_realtime publication
-    const { data: publicationTables, error: publicationError } = await supabase.rpc(
-      'get_publication_tables',
-      { publication_name: 'supabase_realtime' }
-    );
-
-    if (publicationError) {
-      console.error('Error checking publication tables:', publicationError);
-      // Continue anyway as the tables might already be enabled
-      return true;
-    }
-
-    console.log('Publication tables:', publicationTables);
-    
-    // Tables are already enabled for real-time
-    console.log('Real-time is already enabled for fan_links and streaming_links tables');
+    // Since the get_publication_tables RPC is not available, we'll skip this check
+    // and assume the tables are already properly configured for real-time
+    console.log('Skipping publication check - assuming real-time is enabled');
     return true;
   } catch (error) {
     console.error('Error checking real-time for tables:', error);

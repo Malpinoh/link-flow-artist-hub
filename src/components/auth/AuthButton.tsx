@@ -16,7 +16,31 @@ export function AuthButton({ onAuthChange }: AuthButtonProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    // Check for existing session first
+    async function getSession() {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+          return;
+        }
+        
+        setUser(data.session?.user || null);
+        if (onAuthChange) {
+          onAuthChange(!!data.session?.user);
+        }
+      } catch (err) {
+        console.error('Failed to get session:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    getSession();
+
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth event:", event);
       setUser(session?.user || null);
@@ -33,27 +57,6 @@ export function AuthButton({ onAuthChange }: AuthButtonProps) {
         navigate('/');
       }
     });
-
-    // THEN check for existing session
-    async function getUser() {
-      try {
-        const { data, error } = await supabase.auth.getUser();
-        if (error) {
-          console.error('Error getting user:', error);
-          return;
-        }
-        setUser(data.user);
-        if (onAuthChange) {
-          onAuthChange(!!data.user);
-        }
-      } catch (err) {
-        console.error('Failed to get user:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    getUser();
 
     return () => {
       subscription.unsubscribe();
