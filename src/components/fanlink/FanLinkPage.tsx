@@ -44,13 +44,13 @@ export function FanLinkPage() {
           return acc;
         }, {});
         
-        // Combine data - check if button_text exists in the database, falling back to "Listen Now" if not available
+        // Combine data - using optional chaining to safely access properties that might not exist
         const processedFanLink = {
           ...fanLinkData,
           streaming_links: streamingLinks,
           // Map button_text for compatibility with FanLink type
-          // The button_text might not exist in the database schema, so we use optional chaining
-          cta_button_text: fanLinkData.button_text || "Listen Now"
+          // Since button_text might not exist in the database schema, default to "Listen Now"
+          cta_button_text: "Listen Now" // Default value since button_text is not in the type
         };
         
         setFanLink(processedFanLink);
