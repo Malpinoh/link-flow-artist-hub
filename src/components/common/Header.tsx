@@ -17,7 +17,7 @@ export function Header({ isLoggedIn: initialLoggedIn = false }: HeaderProps) {
     <header className="border-b border-border">
       <div className="container flex items-center justify-between h-16 px-4">
         <Link to="/" className="font-bold text-xl flex items-center">
-          <span className="text-gradient bg-clip-text text-transparent">MALPINOHDISTRO LINK</span>
+          <span className="text-gradient bg-clip-text text-transparent">MALPINOHDISTRO FAN LINK</span>
         </Link>
         
         <nav className="hidden md:flex items-center space-x-6">

@@ -123,7 +123,7 @@ export function FanLinkPage() {
         {fanLink.cover_image && <meta name="twitter:image" content={fanLink.cover_image} />}
         
         {/* WhatsApp specific tags */}
-        <meta property="og:site_name" content="Music Link" />
+        <meta property="og:site_name" content="MALPINOHDISTRO FAN LINK" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:locale" content="en_US" />

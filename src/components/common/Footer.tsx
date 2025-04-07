@@ -12,7 +12,7 @@ export function Footer() {
               <div className="h-8 w-8 rounded-full music-gradient flex items-center justify-center">
                 <Music size={18} className="text-white" />
               </div>
-              <span className="font-bold text-xl">MALPINOHDISTRO LINK</span>
+              <span className="font-bold text-xl">MALPINOHDISTRO FAN LINK</span>
             </div>
             <p className="text-sm text-muted-foreground">
               One link for all your music. Share your latest releases across all platforms with a single link.
@@ -48,7 +48,7 @@ export function Footer() {
         </div>
         
         <div className="flex flex-col md:flex-row justify-between items-center mt-8 pt-8 border-t border-border">
-          <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} MALPINOHDISTRO LINK. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} MALPINOHDISTRO FAN LINK. All rights reserved.</p>
           <div className="flex space-x-4 mt-4 md:mt-0">
             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
               <Instagram size={20} />

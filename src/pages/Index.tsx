@@ -100,9 +100,9 @@ const Index = () => {
             <div className="grid gap-6 lg:grid-cols-[1fr_600px] lg:gap-12">
               <div className="flex items-center">
                 <div className="space-y-4">
-                  <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Why Musicians Love MALPINOHDISTRO LINK</h2>
+                  <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Why Musicians Love MALPINOHDISTRO FAN LINK</h2>
                   <p className="text-muted-foreground md:text-xl">
-                    MALPINOHDISTRO LINK is built specifically for independent artists and labels who need simple, effective music promotion tools.
+                    MALPINOHDISTRO FAN LINK is built specifically for independent artists and labels who need simple, effective music promotion tools.
                   </p>
                   <ul className="grid gap-6">
                     <li className="flex items-start">
@@ -152,7 +152,7 @@ const Index = () => {
               <div className="relative mx-auto aspect-video overflow-hidden rounded-xl bg-muted lg:order-last">
                 <img 
                   src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1740&auto=format&fit=crop" 
-                  alt="MALPINOHDISTRO LINK Example" 
+                  alt="MALPINOHDISTRO FAN LINK Example" 
                   className="object-cover w-full h-full"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-40" />
@@ -174,7 +174,7 @@ const Index = () => {
                 Ready to Grow Your Music Audience?
               </h2>
               <p className="mx-auto max-w-[700px] text-lg text-white/80 mb-8">
-                Join thousands of artists using MALPINOHDISTRO LINK to promote their music and connect with fans across all platforms.
+                Join thousands of artists using MALPINOHDISTRO FAN LINK to promote their music and connect with fans across all platforms.
               </p>
               <Button size="lg" variant="secondary" asChild>
                 <Link to="/dashboard">
