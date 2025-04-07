@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Music, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
@@ -89,11 +89,13 @@ export function AuthForm() {
     <Card className="w-full max-w-md glass-card">
       <CardHeader className="space-y-1">
         <div className="flex items-center justify-center mb-4">
-          <div className="h-12 w-12 rounded-full music-gradient flex items-center justify-center">
-            <Music size={24} className="text-white" />
-          </div>
+          <img 
+            src="/lovable-uploads/5ce56a01-182d-4d22-8da7-ebce54d2c617.png" 
+            alt="MALPINOHDISTRO FAN LINK" 
+            className="h-12 w-auto"
+          />
         </div>
-        <CardTitle className="text-2xl text-center">Welcome to FanLink</CardTitle>
+        <CardTitle className="text-2xl text-center">Welcome to MALPINOHDISTRO FAN LINK</CardTitle>
         <CardDescription className="text-center">
           Create one link for all your music
         </CardDescription>
