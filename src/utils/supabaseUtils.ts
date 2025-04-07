@@ -76,7 +76,7 @@ export function subscribeToFanLinks(
       console.log('Streaming link changed:', payload);
       
       // Only forward events for streaming links that belong to this user's fan links
-      if (payload.new && payload.new.fan_link_id) {
+      if (payload.new && typeof payload.new === 'object' && 'fan_link_id' in payload.new) {
         try {
           // Check if this streaming link belongs to one of the user's fan links
           const { data } = await supabase
