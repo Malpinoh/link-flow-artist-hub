@@ -2,94 +2,103 @@
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Set up real-time subscriptions for fan links
- * @param userId - The current user's ID
- * @param onLinkChange - Callback function that runs when links change
- * @returns A function to unsubscribe from real-time updates
+ * Subscribe to real-time changes on the fan_links table for a specific user
  */
-export const subscribeToFanLinks = (
+export function subscribeToFanLinks(
   userId: string,
-  onLinkChange: (eventType: 'INSERT' | 'UPDATE' | 'DELETE', payload: any) => void
-) => {
-  console.log('Setting up real-time subscription for user:', userId);
-  
-  try {
-    // Enable realtime for tables using rpc
-    const enableRealtime = async () => {
-      try {
-        await supabase.rpc('enable_realtime_tables');
-      } catch (err) {
-        console.error("Error enabling realtime:", err);
-        // Continue anyway as tables might already be configured
-      }
-    };
-    
-    // Call the function but don't wait for it
-    enableRealtime();
-    
-    const channel = supabase
-      .channel('fan-links-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
-          schema: 'public',
-          table: 'fan_links',
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          console.log('Realtime fan_links update received:', payload);
-          onLinkChange(payload.eventType as any, payload);
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'streaming_links',
-        },
-        (payload) => {
-          console.log('Realtime streaming_links update received:', payload);
-          // For any streaming_links changes, we'll just trigger a general update
-          onLinkChange('UPDATE', payload);
-        }
-      )
-      .subscribe((status) => {
-        console.log('Realtime subscription status:', status);
-      });
+  callback: (eventType: 'INSERT' | 'UPDATE' | 'DELETE', payload: any) => void
+) {
+  // Subscribe to changes in fan_links table
+  const fanLinksSubscription = supabase
+    .channel('public:fan_links')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'fan_links',
+      filter: `user_id=eq.${userId}`,
+    }, (payload) => {
+      console.log('Fan link changed:', payload);
+      callback(payload.eventType, payload.new);
+    })
+    .subscribe();
 
-    console.log('Real-time subscription setup complete');
-    
-    // Return unsubscribe function
-    return () => {
-      console.log('Unsubscribing from real-time updates');
-      supabase.removeChannel(channel);
-    };
-  } catch (error) {
-    console.error("Error setting up real-time subscription:", error);
-    return () => {};
-  }
-};
+  // Subscribe to changes in streaming_links table that might affect the user's fan links
+  const streamingLinksSubscription = supabase
+    .channel('public:streaming_links')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'streaming_links',
+    }, async (payload) => {
+      console.log('Streaming link changed:', payload);
+      
+      // Only forward events for streaming links that belong to this user's fan links
+      if (payload.new && payload.new.fan_link_id) {
+        try {
+          // Check if this streaming link belongs to one of the user's fan links
+          const { data } = await supabase
+            .from('fan_links')
+            .select('id')
+            .eq('id', payload.new.fan_link_id)
+            .eq('user_id', userId)
+            .single();
+            
+          if (data) {
+            // This streaming link belongs to the user's fan link
+            callback(payload.eventType, payload.new);
+          }
+        } catch (error) {
+          console.error('Error checking fan link ownership:', error);
+        }
+      }
+    })
+    .subscribe();
+
+  // Return unsubscribe function
+  return () => {
+    supabase.removeChannel(fanLinksSubscription);
+    supabase.removeChannel(streamingLinksSubscription);
+  };
+}
 
 /**
- * Enable real-time functionality for the tables
- * This is a one-time setup function to be called on app initialization if needed
+ * Subscribe to changes on a specific fan link
  */
-export const enableRealtimeForTables = async () => {
-  try {
-    // Since direct RPC might not be available, let's use a SQL function call
-    const { error } = await supabase.rpc('enable_realtime_tables');
-    if (error) {
-      console.error('Error enabling realtime:', error);
-      // Continue anyway as tables might already be configured
-    } else {
-      console.log('Successfully enabled realtime for tables');
-    }
-    return true;
-  } catch (error) {
-    console.error('Error checking real-time for tables:', error);
-    // Continue anyway as tables might already be configured
-    return true;
-  }
-};
+export function subscribeToFanLink(
+  fanLinkId: string,
+  callback: (eventType: 'UPDATE' | 'DELETE', payload: any) => void
+) {
+  // Subscribe to changes in the specific fan link
+  const fanLinkSubscription = supabase
+    .channel(`public:fan_links:id=eq.${fanLinkId}`)
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'fan_links',
+      filter: `id=eq.${fanLinkId}`,
+    }, (payload) => {
+      console.log('Fan link updated:', payload);
+      callback(payload.eventType as 'UPDATE' | 'DELETE', payload.new);
+    })
+    .subscribe();
+
+  // Subscribe to changes in streaming links for this fan link
+  const streamingLinksSubscription = supabase
+    .channel(`public:streaming_links:fan_link_id=eq.${fanLinkId}`)
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'streaming_links',
+      filter: `fan_link_id=eq.${fanLinkId}`,
+    }, (payload) => {
+      console.log('Streaming link updated:', payload);
+      callback('UPDATE', { streaming_link_updated: true, ...payload.new });
+    })
+    .subscribe();
+
+  // Return unsubscribe function
+  return () => {
+    supabase.removeChannel(fanLinkSubscription);
+    supabase.removeChannel(streamingLinksSubscription);
+  };
+}

@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FanLink } from "@/types/fanlink";
+import { Helmet } from "react-helmet-async";
 
 export function FanLinkPage() {
   const { slug } = useParams();
@@ -50,7 +51,7 @@ export function FanLinkPage() {
           ...fanLinkData,
           streaming_links: streamingLinks,
           // Set a default value for cta_button_text
-          cta_button_text: "Listen Now" // Default value since button_text is not in the type
+          cta_button_text: fanLinkData.button_text || "Listen Now" // Using button_text from the database
         };
         
         setFanLink(processedFanLink);
@@ -96,18 +97,29 @@ export function FanLinkPage() {
     
   const textStyle = { color: fanLink?.text_color || '#ffffff' };
   
-  const fanLinkFormatted: FanLink = {
-    track_name: fanLink?.title,
-    cover_art_url: fanLink?.cover_image,
-    streaming_links: fanLink?.streaming_links || {},
-    cta_button_text: fanLink?.cta_button_text || "Listen Now",
-    background_color: fanLink?.background_color,
-    background_image_url: fanLink?.background_image_url,
-    slug: fanLink?.slug
-  };
+  const pageTitle = `Stream "${fanLink.title}" by ${fanLink.artist}`;
+  const pageDescription = `Listen to "${fanLink.title}" by ${fanLink.artist} on your favorite music platform.`;
   
   return (
     <div className="flex flex-col min-h-screen" style={bgStyle}>
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="music.song" />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        {fanLink.cover_image && <meta property="og:image" content={fanLink.cover_image} />}
+        <meta property="og:url" content={`https://link.malpinohdistro.com.ng/${fanLink.slug}`} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        {fanLink.cover_image && <meta name="twitter:image" content={fanLink.cover_image} />}
+      </Helmet>
+      
       <main className="flex-grow flex items-center justify-center p-4 py-10">
         <div className="w-full max-w-md bg-black/30 backdrop-blur-md rounded-2xl p-8 shadow-lg" style={textStyle}>
           <div className="flex flex-col items-center">
