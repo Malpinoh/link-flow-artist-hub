@@ -2,6 +2,49 @@
 import { supabase } from "@/integrations/supabase/client";
 
 /**
+ * Enable realtime for all relevant tables
+ */
+export async function enableRealtimeForTables() {
+  try {
+    console.log('Enabling realtime for tables...');
+    
+    // Subscribe to fan_links table
+    const fanLinksChannel = supabase
+      .channel('public:fan_links')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'fan_links' 
+      }, (payload) => {
+        console.log('Fan link change received:', payload);
+      })
+      .subscribe();
+      
+    // Subscribe to streaming_links table
+    const streamingLinksChannel = supabase
+      .channel('public:streaming_links')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'streaming_links' 
+      }, (payload) => {
+        console.log('Streaming link change received:', payload);
+      })
+      .subscribe();
+      
+    console.log('Realtime configured for tables');
+    
+    return () => {
+      supabase.removeChannel(fanLinksChannel);
+      supabase.removeChannel(streamingLinksChannel);
+    };
+  } catch (error) {
+    console.error('Error configuring realtime for tables:', error);
+    return () => {};
+  }
+}
+
+/**
  * Subscribe to real-time changes on the fan_links table for a specific user
  */
 export function subscribeToFanLinks(
