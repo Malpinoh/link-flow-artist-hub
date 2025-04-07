@@ -100,6 +100,9 @@ export function FanLinkPage() {
   const pageTitle = `Stream "${fanLink.title}" by ${fanLink.artist}`;
   const pageDescription = `Listen to "${fanLink.title}" by ${fanLink.artist} on your favorite music platform.`;
   
+  // Determine the full URL for the current page
+  const currentUrl = window.location.href;
+  
   return (
     <div className="flex flex-col min-h-screen" style={bgStyle}>
       <Helmet>
@@ -111,13 +114,19 @@ export function FanLinkPage() {
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         {fanLink.cover_image && <meta property="og:image" content={fanLink.cover_image} />}
-        <meta property="og:url" content={`https://link.malpinohdistro.com.ng/${fanLink.slug}`} />
+        <meta property="og:url" content={currentUrl} />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
         {fanLink.cover_image && <meta name="twitter:image" content={fanLink.cover_image} />}
+        
+        {/* WhatsApp specific tags */}
+        <meta property="og:site_name" content="Music Link" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:locale" content="en_US" />
       </Helmet>
       
       <main className="flex-grow flex items-center justify-center p-4 py-10">
