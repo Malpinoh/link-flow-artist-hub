@@ -55,6 +55,9 @@ export function FanLinkPage() {
         };
         
         setFanLink(processedFanLink);
+        
+        // Log view for analytics (optional)
+        recordLinkView(fanLinkData.id).catch(console.error);
       } catch (err: any) {
         console.error('Error fetching fan link:', err);
         setError(err.message);
@@ -67,6 +70,18 @@ export function FanLinkPage() {
       fetchFanLink();
     }
   }, [slug]);
+  
+  // Record view for analytics
+  const recordLinkView = async (linkId: string) => {
+    try {
+      await supabase.from('link_views').insert([
+        { fan_link_id: linkId, viewed_at: new Date().toISOString() }
+      ]);
+    } catch (err) {
+      // Just log error but don't interrupt user experience
+      console.error('Error recording view:', err);
+    }
+  };
   
   if (loading) {
     return (
@@ -101,32 +116,40 @@ export function FanLinkPage() {
   const pageDescription = `Listen to "${fanLink.title}" by ${fanLink.artist} on your favorite music platform.`;
   
   // Determine the full URL for the current page
-  const currentUrl = window.location.href;
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : `https://link.malpinohdistro.com.ng/link/${slug}`;
+  const absoluteImageUrl = fanLink.cover_image && (fanLink.cover_image.startsWith('http') 
+    ? fanLink.cover_image 
+    : `https://link.malpinohdistro.com.ng${fanLink.cover_image}`);
   
   return (
     <div className="flex flex-col min-h-screen" style={bgStyle}>
       <Helmet>
-        <title>{pageTitle}</title>
+        <title>{pageTitle} | MALPINOHDISTRO FAN LINK</title>
         <meta name="description" content={pageDescription} />
+        <link rel="canonical" href={currentUrl} />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="music.song" />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
-        {fanLink.cover_image && <meta property="og:image" content={fanLink.cover_image} />}
+        {absoluteImageUrl && <meta property="og:image" content={absoluteImageUrl} />}
         <meta property="og:url" content={currentUrl} />
+        <meta property="og:site_name" content="MALPINOHDISTRO FAN LINK" />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
-        {fanLink.cover_image && <meta name="twitter:image" content={fanLink.cover_image} />}
+        {absoluteImageUrl && <meta name="twitter:image" content={absoluteImageUrl} />}
         
         {/* WhatsApp specific tags */}
-        <meta property="og:site_name" content="MALPINOHDISTRO FAN LINK" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:locale" content="en_US" />
+        
+        {/* Additional SEO tags */}
+        <meta name="keywords" content={`${fanLink.title}, ${fanLink.artist}, music, stream music, ${Object.keys(fanLink.streaming_links || {}).join(', ')}`} />
+        <meta name="author" content={fanLink.artist} />
       </Helmet>
       
       <main className="flex-grow flex items-center justify-center p-4 py-10">
@@ -136,7 +159,7 @@ export function FanLinkPage() {
               {fanLink.cover_image ? (
                 <img
                   src={fanLink.cover_image}
-                  alt={fanLink.title}
+                  alt={`${fanLink.title} by ${fanLink.artist}`}
                   className="h-full w-full object-cover"
                 />
               ) : null}

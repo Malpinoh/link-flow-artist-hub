@@ -9,9 +9,11 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
-              <div className="h-8 w-8 rounded-full music-gradient flex items-center justify-center">
-                <Music size={18} className="text-white" />
-              </div>
+              <img 
+                src="/lovable-uploads/5ce56a01-182d-4d22-8da7-ebce54d2c617.png" 
+                alt="MALPINOHDISTRO FAN LINK" 
+                className="h-8 w-auto" 
+              />
               <span className="font-bold text-xl">MALPINOHDISTRO FAN LINK</span>
             </div>
             <p className="text-sm text-muted-foreground">
@@ -50,10 +52,10 @@ export function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center mt-8 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} MALPINOHDISTRO FAN LINK. All rights reserved.</p>
           <div className="flex space-x-4 mt-4 md:mt-0">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+            <a href="https://instagram.com/malpinohdistro" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
               <Instagram size={20} />
             </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+            <a href="https://twitter.com/malpinohdistro" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
               <Twitter size={20} />
             </a>
             <a href="mailto:info@malpinohdistro.com.ng" className="text-muted-foreground hover:text-foreground">

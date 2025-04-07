@@ -1,3 +1,9 @@
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Specific rules for major bots
 User-agent: Googlebot
 Allow: /
 
@@ -10,5 +16,6 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
-Allow: /
+# Sitemap
+Sitemap: https://link.malpinohdistro.com.ng/sitemap.xml
+

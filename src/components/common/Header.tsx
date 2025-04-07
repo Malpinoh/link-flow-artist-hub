@@ -17,6 +17,11 @@ export function Header({ isLoggedIn: initialLoggedIn = false }: HeaderProps) {
     <header className="border-b border-border">
       <div className="container flex items-center justify-between h-16 px-4">
         <Link to="/" className="font-bold text-xl flex items-center">
+          <img 
+            src="/lovable-uploads/5ce56a01-182d-4d22-8da7-ebce54d2c617.png" 
+            alt="MALPINOHDISTRO FAN LINK" 
+            className="h-8 w-auto mr-2" 
+          />
           <span className="text-gradient bg-clip-text text-transparent">MALPINOHDISTRO FAN LINK</span>
         </Link>
         
