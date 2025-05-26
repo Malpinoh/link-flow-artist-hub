@@ -36,6 +36,7 @@ export function Footer() {
               <li><a href="https://malpinohdistro.com.ng/blog" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Blog</a></li>
               <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Help Center</Link></li>
               <li><Link to="/api" className="text-muted-foreground hover:text-foreground transition-colors">API</Link></li>
+              <li><a href="https://malpinohidstro.com.ng" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">DISTRIBUTE MUSIC</a></li>
             </ul>
           </div>
           
