@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -117,9 +116,26 @@ export function FanLinkPage() {
   
   // Determine the full URL for the current page
   const currentUrl = typeof window !== 'undefined' ? window.location.href : `https://link.malpinohdistro.com.ng/link/${slug}`;
-  const absoluteImageUrl = fanLink.cover_image && (fanLink.cover_image.startsWith('http') 
-    ? fanLink.cover_image 
-    : `https://link.malpinohdistro.com.ng${fanLink.cover_image}`);
+  
+  // Ensure cover image URL is absolute and accessible
+  const getAbsoluteImageUrl = (imageUrl: string | null) => {
+    if (!imageUrl) return null;
+    
+    // If it's already an absolute URL, return as is
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    
+    // If it's a relative URL starting with /, make it absolute
+    if (imageUrl.startsWith('/')) {
+      return `https://link.malpinohdistro.com.ng${imageUrl}`;
+    }
+    
+    // Otherwise, assume it's a relative path and prepend the base URL
+    return `https://link.malpinohdistro.com.ng/${imageUrl}`;
+  };
+  
+  const absoluteImageUrl = getAbsoluteImageUrl(fanLink.cover_image);
   
   return (
     <div className="flex flex-col min-h-screen" style={bgStyle}>
@@ -132,24 +148,58 @@ export function FanLinkPage() {
         <meta property="og:type" content="music.song" />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
-        {absoluteImageUrl && <meta property="og:image" content={absoluteImageUrl} />}
         <meta property="og:url" content={currentUrl} />
         <meta property="og:site_name" content="MALPINOHDISTRO FAN LINK" />
+        {absoluteImageUrl && (
+          <>
+            <meta property="og:image" content={absoluteImageUrl} />
+            <meta property="og:image:secure_url" content={absoluteImageUrl} />
+            <meta property="og:image:type" content="image/jpeg" />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
+            <meta property="og:image:alt" content={`${fanLink.title} by ${fanLink.artist} - Cover Art`} />
+          </>
+        )}
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
-        {absoluteImageUrl && <meta name="twitter:image" content={absoluteImageUrl} />}
+        {absoluteImageUrl && (
+          <>
+            <meta name="twitter:image" content={absoluteImageUrl} />
+            <meta name="twitter:image:alt" content={`${fanLink.title} by ${fanLink.artist} - Cover Art`} />
+          </>
+        )}
         
-        {/* WhatsApp specific tags */}
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
+        {/* WhatsApp and other messaging apps */}
         <meta property="og:locale" content="en_US" />
+        <meta name="theme-color" content={fanLink?.background_color || '#3a10e5'} />
         
-        {/* Additional SEO tags */}
+        {/* Music specific meta tags */}
+        <meta property="music:song" content={pageTitle} />
+        <meta property="music:musician" content={fanLink.artist} />
+        
+        {/* Additional SEO and social tags */}
         <meta name="keywords" content={`${fanLink.title}, ${fanLink.artist}, music, stream music, ${Object.keys(fanLink.streaming_links || {}).join(', ')}`} />
         <meta name="author" content={fanLink.artist} />
+        <meta name="robots" content="index, follow" />
+        
+        {/* Structured data for rich snippets */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "MusicRecording",
+            "name": fanLink.title,
+            "byArtist": {
+              "@type": "Person",
+              "name": fanLink.artist
+            },
+            "image": absoluteImageUrl,
+            "url": currentUrl,
+            "sameAs": Object.values(fanLink.streaming_links || {})
+          })}
+        </script>
       </Helmet>
       
       <main className="flex-grow flex items-center justify-center p-4 py-10">
