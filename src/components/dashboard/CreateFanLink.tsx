@@ -42,6 +42,21 @@ export const CreateFanLink = () => {
   const [streamingLinks, setStreamingLinks] = useState<{platform: string, url: string}[]>([]);
   const [platform, setPlatform] = useState("");
   const [url, setUrl] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // Validation helper
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!title.trim()) newErrors.title = "Track title is required";
+    if (!artist.trim()) newErrors.artist = "Artist name is required"; 
+    if (!slug.trim()) newErrors.slug = "Custom link is required";
+    if (!coverImage) newErrors.coverImage = "Cover art is required";
+    if (streamingLinks.length === 0) newErrors.streamingLinks = "At least one streaming link is required";
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
   
   const generateSlug = () => {
     if (title) {
@@ -51,6 +66,7 @@ export const CreateFanLink = () => {
       
       const randomString = Math.random().toString(36).substring(2, 6);
       setSlug(`${baseSlug}-${randomString}`);
+      setErrors(prev => ({...prev, slug: ""}));
     }
   };
   
@@ -65,6 +81,12 @@ export const CreateFanLink = () => {
       return;
     }
     
+    // Check for duplicate platforms
+    if (streamingLinks.some(link => link.platform === platform)) {
+      toast.error("This platform has already been added");
+      return;
+    }
+    
     const platformName = MUSIC_PLATFORMS.find(p => p.id === platform)?.name || platform;
     
     setStreamingLinks([...streamingLinks, {
@@ -74,6 +96,7 @@ export const CreateFanLink = () => {
     
     setPlatform("");
     setUrl("");
+    setErrors(prev => ({...prev, streamingLinks: ""}));
     
     toast.success(`Added ${platformName} link`);
   };
@@ -82,6 +105,7 @@ export const CreateFanLink = () => {
     const newLinks = [...streamingLinks];
     newLinks.splice(index, 1);
     setStreamingLinks(newLinks);
+    toast.info("Streaming link removed");
   };
   
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,18 +125,14 @@ export const CreateFanLink = () => {
     const reader = new FileReader();
     reader.onloadend = () => {
       setCoverImage(reader.result as string);
+      setErrors(prev => ({...prev, coverImage: ""}));
     };
     reader.readAsDataURL(file);
   };
   
   const saveLink = async () => {
-    if (!title || !artist || !slug || !coverImage) {
-      toast.error("Please fill out all required fields");
-      return;
-    }
-    
-    if (streamingLinks.length === 0) {
-      toast.error("Please add at least one streaming link");
+    if (!validateForm()) {
+      toast.error("Please fix the errors before saving");
       return;
     }
     
@@ -127,6 +147,19 @@ export const CreateFanLink = () => {
         return;
       }
       
+      // Check if slug already exists
+      const { data: existingSlug } = await supabase
+        .from('fan_links')
+        .select('slug')
+        .eq('slug', slug)
+        .single();
+        
+      if (existingSlug) {
+        toast.error("This custom link is already taken. Please choose another one.");
+        setErrors(prev => ({...prev, slug: "This link is already taken"}));
+        return;
+      }
+      
       const { data: fanLink, error: fanLinkError } = await supabase.from('fan_links').insert({
         title,
         artist,
@@ -136,6 +169,7 @@ export const CreateFanLink = () => {
         text_color: textColor,
         button_color: buttonColor,
         button_text_color: buttonTextColor,
+        button_text: buttonText,
         user_id: user.id,
       }).select().single();
       
@@ -152,7 +186,7 @@ export const CreateFanLink = () => {
       
       if (streamingLinksError) throw streamingLinksError;
       
-      toast.success("Your link has been created!");
+      toast.success("Your link has been created successfully!");
       navigate("/dashboard");
     } catch (error: any) {
       console.error("Error saving link:", error);
@@ -194,20 +228,28 @@ export const CreateFanLink = () => {
                   <Input 
                     id="title" 
                     value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    onChange={(e) => {
+                      setTitle(e.target.value);
+                      setErrors(prev => ({...prev, title: ""}));
+                    }}
                     placeholder="Enter the name of your release"
-                    required
+                    className={errors.title ? "border-red-500" : ""}
                   />
+                  {errors.title && <p className="text-sm text-red-500">{errors.title}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="artist">Artist Name *</Label>
                   <Input 
                     id="artist" 
                     value={artist}
-                    onChange={(e) => setArtist(e.target.value)}
+                    onChange={(e) => {
+                      setArtist(e.target.value);
+                      setErrors(prev => ({...prev, artist: ""}));
+                    }}
                     placeholder="Your artist name"
-                    required
+                    className={errors.artist ? "border-red-500" : ""}
                   />
+                  {errors.artist && <p className="text-sm text-red-500">{errors.artist}</p>}
                 </div>
               </div>
               
@@ -220,6 +262,7 @@ export const CreateFanLink = () => {
                     onClick={generateSlug}
                     type="button"
                     className="h-6 text-xs"
+                    disabled={!title}
                   >
                     Generate
                   </Button>
@@ -231,19 +274,23 @@ export const CreateFanLink = () => {
                   <Input 
                     id="slug" 
                     value={slug}
-                    onChange={(e) => setSlug(e.target.value
-                      .toLowerCase()
-                      .replace(/\s+/g, '-')
-                      .replace(/[^\w-]+/g, ''))}
-                    className="rounded-l-none"
-                    required
+                    onChange={(e) => {
+                      const newSlug = e.target.value
+                        .toLowerCase()
+                        .replace(/\s+/g, '-')
+                        .replace(/[^\w-]+/g, '');
+                      setSlug(newSlug);
+                      setErrors(prev => ({...prev, slug: ""}));
+                    }}
+                    className={`rounded-l-none ${errors.slug ? "border-red-500" : ""}`}
                   />
                 </div>
+                {errors.slug && <p className="text-sm text-red-500">{errors.slug}</p>}
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="cover-image">Cover Art *</Label>
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-muted-foreground/25 rounded-md p-4 h-[300px] relative">
+                <div className={`flex flex-col items-center justify-center border-2 border-dashed rounded-md p-4 h-[300px] relative ${errors.coverImage ? 'border-red-500' : 'border-muted-foreground/25'}`}>
                   {coverImage ? (
                     <>
                       <img 
@@ -284,11 +331,12 @@ export const CreateFanLink = () => {
                     </div>
                   )}
                 </div>
+                {errors.coverImage && <p className="text-sm text-red-500">{errors.coverImage}</p>}
               </div>
               
               <div>
                 <Label className="mb-2 block">Streaming Links *</Label>
-                <Card className="border-dashed">
+                <Card className={`border-dashed ${errors.streamingLinks ? 'border-red-500' : ''}`}>
                   <CardContent className="p-4">
                     <div className="space-y-4">
                       {streamingLinks.map((link, index) => (
@@ -347,7 +395,7 @@ export const CreateFanLink = () => {
                                   onChange={(e) => setPlatform(e.target.value)}
                                 >
                                   <option value="">Select a platform</option>
-                                  {MUSIC_PLATFORMS.map((platform) => (
+                                  {MUSIC_PLATFORMS.filter(p => !streamingLinks.some(link => link.platform === p.id)).map((platform) => (
                                     <option key={platform.id} value={platform.id}>
                                       {platform.name}
                                     </option>
@@ -358,7 +406,7 @@ export const CreateFanLink = () => {
                               <div className="space-y-2">
                                 <FormLabel>URL</FormLabel>
                                 <Input
-                                  placeholder="https://..."
+                                  placeholder="https://spotify.com/album/..."
                                   value={url}
                                   onChange={(e) => setUrl(e.target.value)}
                                 />
@@ -370,7 +418,7 @@ export const CreateFanLink = () => {
                                 <Button variant="outline">Cancel</Button>
                               </DialogTrigger>
                               <DialogTrigger asChild>
-                                <Button onClick={addStreamingLink}>
+                                <Button onClick={addStreamingLink} disabled={!platform || !url}>
                                   <Plus className="h-4 w-4 mr-2" />
                                   Add Link
                                 </Button>
@@ -382,6 +430,7 @@ export const CreateFanLink = () => {
                     </div>
                   </CardContent>
                 </Card>
+                {errors.streamingLinks && <p className="text-sm text-red-500">{errors.streamingLinks}</p>}
               </div>
               
               <div className="pt-4">
@@ -484,10 +533,7 @@ export const CreateFanLink = () => {
               {isLoading ? (
                 <>
                   <span className="mr-2">Saving...</span>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
                 </>
               ) : (
                 <>

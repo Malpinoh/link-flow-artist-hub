@@ -1,10 +1,12 @@
+
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Share2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FanLink } from "@/types/fanlink";
 import { Helmet } from "react-helmet-async";
+import { toast } from "sonner";
 
 export function FanLinkPage() {
   const { slug } = useParams();
@@ -81,20 +83,49 @@ export function FanLinkPage() {
       console.error('Error recording view:', err);
     }
   };
+
+  // Share functionality
+  const handleShare = async () => {
+    const url = window.location.href;
+    const title = `Stream "${fanLink.title}" by ${fanLink.artist}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title,
+          text: `Check out this new music from ${fanLink.artist}!`,
+          url
+        });
+      } catch (err) {
+        console.log('Share canceled');
+      }
+    } else {
+      // Fallback to clipboard
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success('Link copied to clipboard!');
+      } catch (err) {
+        toast.error('Failed to copy link');
+      }
+    }
+  };
   
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-primary/20 to-secondary/20">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading your music...</p>
+        </div>
       </div>
     );
   }
   
   if (error || !fanLink) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen space-y-4 p-4 text-center">
+      <div className="flex flex-col items-center justify-center h-screen space-y-4 p-4 text-center bg-gradient-to-br from-primary/20 to-secondary/20">
         <h1 className="text-3xl font-bold">Link Not Found</h1>
-        <p className="text-muted-foreground">The link you're looking for doesn't exist or has been removed.</p>
+        <p className="text-muted-foreground max-w-md">The link you're looking for doesn't exist or has been removed.</p>
         <Button asChild>
           <Link to="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -202,10 +233,23 @@ export function FanLinkPage() {
         </script>
       </Helmet>
       
+      {/* Share Button */}
+      <div className="fixed top-4 right-4 z-10">
+        <Button
+          onClick={handleShare}
+          size="sm"
+          variant="secondary"
+          className="backdrop-blur-sm bg-black/20 hover:bg-black/30 text-white border-white/20"
+        >
+          <Share2 className="h-4 w-4 mr-2" />
+          Share
+        </Button>
+      </div>
+      
       <main className="flex-grow flex items-center justify-center p-4 py-10">
-        <div className="w-full max-w-md bg-black/30 backdrop-blur-md rounded-2xl p-8 shadow-lg" style={textStyle}>
+        <div className="w-full max-w-md bg-black/30 backdrop-blur-md rounded-2xl p-8 shadow-lg animate-fade-in" style={textStyle}>
           <div className="flex flex-col items-center">
-            <div className="h-48 w-48 rounded-lg overflow-hidden mb-6 shadow-lg">
+            <div className="h-48 w-48 rounded-lg overflow-hidden mb-6 shadow-lg hover-scale">
               {fanLink.cover_image ? (
                 <img
                   src={fanLink.cover_image}
@@ -228,7 +272,7 @@ export function FanLinkPage() {
                   href={url as string}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center w-full p-3 rounded-md transition-all hover:opacity-90 text-white"
+                  className="flex items-center justify-center w-full p-3 rounded-md transition-all hover:opacity-90 hover:scale-105 text-white font-medium"
                   style={{ backgroundColor: getPlatformColor(platform) }}
                 >
                   {getPlatformName(platform)}

@@ -26,7 +26,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">Home</Link></li>
               <li><Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link></li>
-              <li><Link to="/features" className="text-muted-foreground hover:text-foreground transition-colors">Features</Link></li>
+              <li><Link to="/resources" className="text-muted-foreground hover:text-foreground transition-colors">Resources</Link></li>
             </ul>
           </div>
           
@@ -35,8 +35,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li><a href="https://malpinohdistro.com.ng/blog" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Blog</a></li>
               <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Help Center</Link></li>
-              <li><Link to="/api" className="text-muted-foreground hover:text-foreground transition-colors">API</Link></li>
-              <li><a href="https://malpinohidstro.com.ng" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">DISTRIBUTE MUSIC</a></li>
+              <li><a href="https://malpinohdistro.com.ng" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors font-medium">DISTRIBUTE MUSIC</a></li>
             </ul>
           </div>
           
@@ -53,13 +52,13 @@ export function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center mt-8 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} MALPINOHDISTRO FAN LINK. All rights reserved.</p>
           <div className="flex space-x-4 mt-4 md:mt-0">
-            <a href="https://instagram.com/malpinohdistro" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+            <a href="https://instagram.com/malpinohdistro" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
               <Instagram size={20} />
             </a>
-            <a href="https://twitter.com/malpinohdistro" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+            <a href="https://twitter.com/malpinohdistro" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
               <Twitter size={20} />
             </a>
-            <a href="mailto:info@malpinohdistro.com.ng" className="text-muted-foreground hover:text-foreground">
+            <a href="mailto:info@malpinohdistro.com.ng" className="text-muted-foreground hover:text-primary transition-colors">
               <Mail size={20} />
             </a>
           </div>
