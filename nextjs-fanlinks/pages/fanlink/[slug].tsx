@@ -187,19 +187,9 @@ function getPlatformName(platform: string): string {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Get all fan links from Supabase
-  const { data: fanLinks } = await supabase
-    .from('fan_links')
-    .select('slug')
-    .limit(1000); // Adjust limit as needed
-  
-  const paths = fanLinks?.map((fanLink) => ({
-    params: { slug: fanLink.slug },
-  })) || [];
-  
   return {
-    paths,
-    fallback: 'blocking', // Enable ISR for new links
+    paths: [],
+    fallback: 'blocking', // Enable on-demand generation
   };
 };
 
@@ -212,35 +202,47 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     };
   }
   
-  // Fetch fan link data
-  const { data: fanLinkData, error: fanLinkError } = await supabase
-    .from('fan_links')
-    .select('*')
-    .eq('slug', slug)
-    .single();
+  try {
+    // Fetch fan link data
+    const { data: fanLinkData, error: fanLinkError } = await supabase
+      .from('fan_links')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+      
+    if (fanLinkError || !fanLinkData) {
+      console.error('Fan link not found:', fanLinkError);
+      return {
+        notFound: true,
+      };
+    }
     
-  if (fanLinkError || !fanLinkData) {
+    // Fetch streaming links
+    const { data: streamingLinksData, error: streamingLinksError } = await supabase
+      .from('streaming_links')
+      .select('*')
+      .eq('fan_link_id', fanLinkData.id)
+      .order('position', { ascending: true });
+    
+    if (streamingLinksError) {
+      console.error('Error fetching streaming links:', streamingLinksError);
+    }
+    
+    const fanLink: FanLink = {
+      ...fanLinkData,
+      streaming_links: streamingLinksData || [],
+    };
+    
+    return {
+      props: {
+        fanLink,
+      },
+      revalidate: 3600, // Revalidate every hour
+    };
+  } catch (error) {
+    console.error('Error in getStaticProps:', error);
     return {
       notFound: true,
     };
   }
-  
-  // Fetch streaming links
-  const { data: streamingLinksData } = await supabase
-    .from('streaming_links')
-    .select('*')
-    .eq('fan_link_id', fanLinkData.id)
-    .order('position', { ascending: true });
-  
-  const fanLink: FanLink = {
-    ...fanLinkData,
-    streaming_links: streamingLinksData || [],
-  };
-  
-  return {
-    props: {
-      fanLink,
-    },
-    revalidate: 3600, // Revalidate every hour
-  };
 };
