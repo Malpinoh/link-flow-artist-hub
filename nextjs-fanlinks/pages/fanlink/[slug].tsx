@@ -196,33 +196,62 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = params?.slug as string;
   
+  console.log('=== DEBUG getStaticProps ===');
+  console.log('Received slug:', slug);
+  console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+  console.log('Has Supabase Key:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  
   if (!slug) {
+    console.log('No slug provided');
     return {
       notFound: true,
     };
   }
   
   try {
+    // Test Supabase connection first
+    const { data: testData, error: testError } = await supabase
+      .from('fan_links')
+      .select('slug')
+      .limit(1);
+    
+    console.log('Supabase connection test:', { testData, testError });
+    
     // Fetch fan link data
+    console.log('Querying fan_links table for slug:', slug);
     const { data: fanLinkData, error: fanLinkError } = await supabase
       .from('fan_links')
       .select('*')
       .eq('slug', slug)
       .single();
       
+    console.log('Fan link query result:', { fanLinkData, fanLinkError });
+      
     if (fanLinkError || !fanLinkData) {
       console.error('Fan link not found:', fanLinkError);
+      
+      // Let's also try a broader search to see what slugs exist
+      const { data: allSlugs } = await supabase
+        .from('fan_links')
+        .select('slug')
+        .limit(10);
+      
+      console.log('Available slugs in database:', allSlugs?.map(item => item.slug));
+      
       return {
         notFound: true,
       };
     }
     
     // Fetch streaming links
+    console.log('Fetching streaming links for fan_link_id:', fanLinkData.id);
     const { data: streamingLinksData, error: streamingLinksError } = await supabase
       .from('streaming_links')
       .select('*')
       .eq('fan_link_id', fanLinkData.id)
       .order('position', { ascending: true });
+    
+    console.log('Streaming links result:', { streamingLinksData, streamingLinksError });
     
     if (streamingLinksError) {
       console.error('Error fetching streaming links:', streamingLinksError);
@@ -232,6 +261,9 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       ...fanLinkData,
       streaming_links: streamingLinksData || [],
     };
+    
+    console.log('Final fanLink object:', fanLink);
+    console.log('=== END DEBUG ===');
     
     return {
       props: {
